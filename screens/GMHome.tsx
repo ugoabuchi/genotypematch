@@ -847,6 +847,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
   return (
     <>
+    <StatusBar theme={Theme} />
       <View style={Theme.GMHomeScreenStyle.container}>
         <View style={Theme.GMHomeScreenStyle.header}>
 

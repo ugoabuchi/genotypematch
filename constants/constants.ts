@@ -1,4 +1,8 @@
+//import Constants from "expo-constants";
 import { reduxStoreLocalKeyType } from "../types";
+
+//const { manifest } = Constants;
+//const EXPO_UNDERLAY_SERVER_LINK = `http://${manifest.debuggerHost.split(':').shift()}:19000`;
 
 export const COPYRIGHTS = {
   vendor: "TECKOPS LTD",
@@ -20,6 +24,7 @@ export const COPYRIGHTS = {
   }
 }
 export const MAIN_URL = "http://10.0.2.2/genotypematch-web/";
+//export const MAIN_URL = EXPO_UNDERLAY_SERVER_LINK+"/genotypematch-web/";
 export const ReQUEST_URL = MAIN_URL + "API_REQUEST";
 export const ReQUEST_IMAGE_URL = MAIN_URL + "webapp/File_Uploads/Gallery/Images";
 export const AXIOS_HEADER_CONFIG = {

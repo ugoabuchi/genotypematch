@@ -31,6 +31,7 @@ const SplashScreen = ({ navigation, general_session }: NavPropsType) => {
   const Theme = general_session.general_session.theme_mode;
   return (
     <>
+    <StatusBar theme={Theme} />
       <View style={Theme.SplashScreenStyle.container}>
         <View style={Theme.SplashScreenStyle.imageViewBox}>
           <LogoWTIcon />

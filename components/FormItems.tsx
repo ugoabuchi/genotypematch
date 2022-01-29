@@ -42,7 +42,7 @@ export const NameInputBox = ({ theme, language, placeholder = null, defaultvalue
                 </View>
 
                 <View style={theme.FormItemsStyle.FormBox.inputContainer}>
-                    <TextInput editable={editable} numberOfLines={1} placeholder={placeholder == null ? language.GENERAL.NAMEPLACEHOLDER : placeholder} placeholderTextColor={theme.GenralComponentColors.COMPLIMENTARY1} value={inputValue} keyboardType="default" autoCompleteType="off" autoCapitalize="words" autoFocus={false} autoCorrect={false} onChangeText={(text) => setInputValue(text)} style={theme.FormItemsStyle.FormBox.TextInput} />
+                    <TextInput editable={editable} numberOfLines={1} placeholder={placeholder == null ? language.GENERAL.NAMEPLACEHOLDER : placeholder} placeholderTextColor={theme.GenralComponentColors.COMPLIMENTARY1} value={inputValue} keyboardType="default" autoComplete="off" autoCapitalize="words" autoFocus={false} autoCorrect={false} onChangeText={(text) => setInputValue(text)} style={theme.FormItemsStyle.FormBox.TextInput} />
                 </View>
 
                 <View style={theme.FormItemsStyle.FormBox.rightIconContainer}>
@@ -170,7 +170,7 @@ export const UsernameInputBox = ({ theme, language, useCase = "signup", placehol
                 </View>
 
                 <View style={theme.FormItemsStyle.FormBox.inputContainer}>
-                    <TextInput editable={editable} numberOfLines={1} placeholder={placeholder == null ? language.GENERAL.USERNAMEPLACEHOLDER : placeholder} placeholderTextColor={theme.GenralComponentColors.COMPLIMENTARY1} value={inputValue} keyboardType="default" autoCompleteType="off" autoCapitalize="none" autoFocus={false} autoCorrect={false} onChangeText={(text) => { setInputValue(text) }} style={theme.FormItemsStyle.FormBox.TextInput} />
+                    <TextInput editable={editable} numberOfLines={1} placeholder={placeholder == null ? language.GENERAL.USERNAMEPLACEHOLDER : placeholder} placeholderTextColor={theme.GenralComponentColors.COMPLIMENTARY1} value={inputValue} keyboardType="default" autoComplete="off" autoCapitalize="none" autoFocus={false} autoCorrect={false} onChangeText={(text) => { setInputValue(text) }} style={theme.FormItemsStyle.FormBox.TextInput} />
                 </View>
 
                 <View style={theme.FormItemsStyle.FormBox.rightIconContainer}>
@@ -301,7 +301,7 @@ export const PasskeyInputBox = ({ theme, language, placeholder = null, defaultva
                     <View style={theme.FormItemsStyle.FormBox.inputInnerDoubleContainer}>
 
                         <View style={theme.FormItemsStyle.FormBox.inputInnerDoubleContainerinputContainer}>
-                            <TextInput editable={editable} numberOfLines={1} placeholder={placeholder == null ? language.GENERAL.PASSKEYPLACEHOLDER : placeholder} placeholderTextColor={theme.GenralComponentColors.COMPLIMENTARY1} value={inputValue} keyboardType="numeric" secureTextEntry={isSecure} autoCompleteType="off" autoCapitalize="none" autoFocus={false} autoCorrect={false} onChangeText={(text) => { setInputValue(text) }} style={theme.FormItemsStyle.FormBox.TextInput} />
+                            <TextInput editable={editable} numberOfLines={1} placeholder={placeholder == null ? language.GENERAL.PASSKEYPLACEHOLDER : placeholder} placeholderTextColor={theme.GenralComponentColors.COMPLIMENTARY1} value={inputValue} keyboardType="numeric" secureTextEntry={isSecure} autoComplete="off" autoCapitalize="none" autoFocus={false} autoCorrect={false} onChangeText={(text) => { setInputValue(text) }} style={theme.FormItemsStyle.FormBox.TextInput} />
                         </View>
                         <View style={theme.FormItemsStyle.FormBox.inputInnerDoubleContainerrightIconContainer}>
                             {

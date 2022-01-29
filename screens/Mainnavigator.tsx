@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerNavigationOptions } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import MenuDrawer from './Drawer';
 import GMHome from './GMHome';
@@ -14,7 +14,8 @@ import SplashScreen from './SplashScreen';
 import StartUpSplash from './StartUpSplash';
 import Notifications from './Notifications';
 import Market from './Market';
-const screenOptionStyle = {
+
+const ScreenOptionSettings = {
   headerShown: false
 };
 
@@ -31,7 +32,7 @@ const BeforeLoginStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="SplashScreen"
-      screenOptions={screenOptionStyle}>
+      screenOptions={ScreenOptionSettings}>
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="StartUpSplash" component={StartUpSplash} />
       <Stack.Screen name="Session" component={Session} />
@@ -76,11 +77,11 @@ const AfterLoginTab = () => {
 
 
     >
-      <Tab.Screen name="Encounter" component={GMHome} />
-      <Tab.Screen name="Matches" component={Matches} />
-      <Tab.Screen name="Chats" component={Messages} />
-      <Tab.Screen name="Notifications" component={Notifications} />
-      <Tab.Screen name="Market" component={Market} />
+      <Tab.Screen name="Encounter" component={GMHome} options={ScreenOptionSettings}/>
+      <Tab.Screen name="Matches" component={Matches} options={ScreenOptionSettings}/>
+      <Tab.Screen name="Chats" component={Messages} options={ScreenOptionSettings}/>
+      <Tab.Screen name="Notifications" component={Notifications} options={ScreenOptionSettings}/>
+      <Tab.Screen name="Market" component={Market} options={ScreenOptionSettings}/>
     </Tab.Navigator>
   );
 };
@@ -91,7 +92,7 @@ const OtherStack = () => {
 
     <Stack.Navigator
       initialRouteName="Profile"
-      screenOptions={screenOptionStyle}>
+      screenOptions={ScreenOptionSettings}>
       <Stack.Screen name="Settings" component={Settings} />
     </Stack.Navigator>
 
@@ -104,6 +105,7 @@ const AfterLoginDrawer = () => {
   return (
     <Drawer.Navigator
       initialRouteName="AfterLogin"
+      screenOptions={ScreenOptionSettings}
       drawerContent={(props) => <MenuDrawer {...props} />}>
       <Drawer.Screen name="AfterLogin" component={AfterLoginTab} />
       <Drawer.Screen name="Others" component={OtherStack} />

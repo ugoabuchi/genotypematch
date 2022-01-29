@@ -250,6 +250,7 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
 
   return (
     <>
+    <StatusBar theme={Theme} />
       <View style={Theme.GMLoginStyle.container}>
 
         <View style={Theme.GMLoginStyle.top}>

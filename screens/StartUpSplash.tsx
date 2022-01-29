@@ -71,6 +71,7 @@ const StartUpSplash = ({ navigation, route, login_session, profile_session, gene
 
   return (
     <>
+    <StatusBar theme={Theme} />
       <View style={Theme.StartUpScreenStyle.container}>
         <View style={Theme.StartUpScreenStyle.imageViewBox}>
           <SampleUsersImage />

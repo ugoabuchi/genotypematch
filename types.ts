@@ -11,7 +11,22 @@ export type GeneralSessionType = {
     lastLogError: string,
     theme_mode: any,
     storeLocalData: boolean,
-    bearer: string
+    bearer: string,
+    settings: {
+      statusBar: boolean,
+            fingerprint: boolean,
+            notification: {
+                background: boolean,
+                style : "slide" | "popup",
+                messages: boolean,
+                likes: boolean,
+                gifts: boolean,
+                profile: boolean,
+                upgrades: boolean,
+                payments: boolean,
+                general: boolean,
+            }
+    }
 
   };
 
@@ -69,8 +84,6 @@ export type MainButtonTtype = {
 }
 
 export type StatusBarType = {
-
-  theme: any;
   hidden?: boolean;
 
 }
@@ -152,17 +165,41 @@ export type ModalBoxParamType = {
   confirmText?: string;
   confirmAction?: () => void
   closeAction: () => void;
-  initialOpenAction?: () => void;
 
+}
+
+export type ModalViewTPopUp = {
+  theme: any;
+  language: any;
+  title: string, 
+  content: JSX.Element;
+  confirmText: string;
+  confirmAction: ()=>void;
+  closeAction: ()=>void;
 }
 
 export type MyModalType = {
 
   theme: any;
   showAlert: boolean;
-  customView: {};
+  customView: JSX.Element;
 
 }
+
+
+export type MyModalViewType = {
+
+  theme: any;
+  language: any;
+  title?: string;
+  content: JSX.Element;
+  showModal: boolean;
+  confirmText?: string;
+  confirmAction?: () => void
+  closeAction: () => void;
+
+}
+
 
 export type AlertBoxStateParamType = {
 
@@ -195,6 +232,17 @@ export type ToastBoxStateType = {
 
 }
 
+export type ModalPopUp = {
+  theme: any;
+  language: any;
+  title: string;
+  showModal: boolean; 
+  content: JSX.Element;
+  showConfirm?: boolean;
+  confirmText?: string;
+  confirmAction?: () => void;
+  closeAction: () => void;
+}
 export type PulseAnimationType = {
 
   propData: {},
@@ -322,28 +370,31 @@ export type MatchFilterType = {
 
 export type ModalStateType = {
   title: string;
-  confirmText?: string;
-  confirmAction?: () => void;
-  initialOpenAction?: () => void;
+  confirmText: string;
+  confirmAction: () => void;
+  closeAction: () => void;
   showModal: boolean;
+  content: JSX.Element
 }
 
 
 export type MatchesCardType = {
   key: number;
-  id: number;
+  id: string;
   name: string;
   gender: 'Male' | 'Female';
-  locationcode: string;
-  distance: string;
   dob: string;
   blooggroup: 'AA' | 'AS' | 'AC' | 'SS' | 'SC' | 'CC';
   description: string;
   url: string;
   accounttype: 'Basic' | 'Premium' | 'VIP';
+  lastseencountry: string;
+  lastseencity: string;
+  lastseencoords: string;
+  distance: string;
   pverified: 'true' | 'false';
   bverified: 'true' | 'false';
-  isOnline: 'true' | 'false';
+  online: 'true' | 'false';
 }
 
 export type CardType = {

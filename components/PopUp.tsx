@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import AwesomeAlert from 'react-native-awesome-alerts';
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { AlertBoxParamType, ModalBoxParamType, MyModalType, ToastBoxParamType } from "../types";
+import { AlertBoxParamType, ModalViewTPopUp, MyModalType, MyModalViewType, ToastBoxParamType } from "../types";
 import { SuccessAlertIcon, ErrorAlertIcon, WarningAlertIcon, NormalAlertIcon } from "./Icon";
 import { PulseViewAnimation, SlideInFromRightViewAnimation } from "./Animations";
 
 
-export const PopUp = ({ theme, showAlert, customView }: MyModalType) => {
+export const PopUp = ({ theme, showAlert = false, customView }: MyModalType) => {
 
   return (
     <AwesomeAlert
@@ -21,10 +21,79 @@ export const PopUp = ({ theme, showAlert, customView }: MyModalType) => {
       contentContainerStyle={theme.PopUpStyle.contentContainer}
       contentStyle={theme.PopUpStyle.content}
       actionContainerStyle={theme.PopUpStyle.actionContainer}
+      modalProps={
+        {
+          statusBarTranslucent: true,
+          transparent: true,
+          
+        }
+      }
+      
 
     />
   );
 
+}
+
+export const ModalPopUpBox = ({ theme, language, title, showModal = false, content, confirmText = null, confirmAction = null, closeAction }: MyModalViewType) => {
+
+  return (
+    <AwesomeAlert
+      show={showModal}
+      showProgress={false}
+      customView={<ModalContentView theme={theme} language={language} title={title} content={content} confirmText={confirmText} confirmAction={()=>confirmAction()} closeAction={()=>closeAction()}/>}
+      closeOnTouchOutside={false}
+      closeOnHardwareBackPress={false}
+      showCancelButton={false}
+      showConfirmButton={false}
+      alertContainerStyle={theme.PopUpStyle.container}
+      contentContainerStyle={theme.PopUpStyle.contentContainer}
+      contentStyle={theme.PopUpStyle.content}
+      actionContainerStyle={theme.PopUpStyle.actionContainer}
+      modalProps={
+        {
+          statusBarTranslucent: true,
+          transparent: true,
+        }
+      }
+      
+
+    />
+  );
+
+}
+
+const ModalContentView = ({theme, language, title, content, confirmText, confirmAction, closeAction} : ModalViewTPopUp) : JSX.Element => {
+
+  return (
+    <View style={theme.MyModalStyle.GENERAL.container}>
+
+        <View style={theme.MyModalStyle.GENERAL.header}>
+          <View style={confirmAction == null ? theme.MyModalStyle.GENERAL.headerTextBox : theme.MyModalStyle.GENERAL.headerTextBox1}>
+            <Text numberOfLines={1} adjustsFontSizeToFit={true} style={theme.MyModalStyle.GENERAL.headerText}>{title == null || title == "" ? language.GENERAL.DEFAULT_MODAL_TITLE : title}</Text>
+          </View>
+
+          {
+            confirmAction != null
+            &&
+            <TouchableOpacity onPress={() => confirmAction()} style={theme.MyModalStyle.GENERAL.headerConfirmBox}>
+              <Text numberOfLines={1} adjustsFontSizeToFit={true} style={theme.MyModalStyle.GENERAL.headerConfirmText}>{confirmText == null ? language.GENERAL.DEFAULT_MODAL_CORNFIRM_TEXT : confirmText}</Text>
+            </TouchableOpacity>
+          }
+
+          <TouchableOpacity onPress={() => closeAction()} style={theme.MyModalStyle.GENERAL.headerCloseBox}>
+            <Text numberOfLines={1} adjustsFontSizeToFit={true} style={theme.MyModalStyle.GENERAL.headerCloseText}>{language.GENERAL.DEFAULT_MODAL_CLOSE_TEXT}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={theme.MyModalStyle.GENERAL.containerBody}>
+          <ScrollView>
+            {content}
+          </ScrollView>
+        </View>
+
+      </View>
+  )
 }
 
 export const MyAlert = ({ theme, language, alertType, showAlert, title, message, cancelText, cancelAction, showConfirm = false, confirmText = null, confirmAction = () => { } }: AlertBoxParamType) => {
@@ -74,49 +143,7 @@ export const MyAlert = ({ theme, language, alertType, showAlert, title, message,
 
 
 
-export const MyModal = ({ theme, language, title, content, showModal, confirmText = null, confirmAction = null, closeAction, initialOpenAction }: ModalBoxParamType) => {
 
-  useEffect(() => {
-    if (showModal == true) {
-      initialOpenAction();
-    }
-  }, [showModal])
-
-  return (
-
-    <PopUp theme={theme} showAlert={showModal} customView={(
-      <View style={theme.MyModalStyle.GENERAL.container}>
-
-        <View style={theme.MyModalStyle.GENERAL.header}>
-          <View style={confirmAction == null ? theme.MyModalStyle.GENERAL.headerTextBox : theme.MyModalStyle.GENERAL.headerTextBox1}>
-            <Text numberOfLines={1} adjustsFontSizeToFit={true} style={theme.MyModalStyle.GENERAL.headerText}>{title == null || title == "" ? language.GENERAL.DEFAULT_MODAL_TITLE : title}</Text>
-          </View>
-
-          {
-            confirmAction != null
-            &&
-            <TouchableOpacity onPress={() => confirmAction()} style={theme.MyModalStyle.GENERAL.headerConfirmBox}>
-              <Text numberOfLines={1} adjustsFontSizeToFit={true} style={theme.MyModalStyle.GENERAL.headerConfirmText}>{confirmText == null ? language.GENERAL.DEFAULT_MODAL_CORNFIRM_TEXT : confirmText}</Text>
-            </TouchableOpacity>
-          }
-
-          <TouchableOpacity onPress={() => closeAction()} style={theme.MyModalStyle.GENERAL.headerCloseBox}>
-            <Text numberOfLines={1} adjustsFontSizeToFit={true} style={theme.MyModalStyle.GENERAL.headerCloseText}>{language.GENERAL.DEFAULT_MODAL_CLOSE_TEXT}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={theme.MyModalStyle.GENERAL.containerBody}>
-          <ScrollView>
-            {content}
-          </ScrollView>
-        </View>
-
-      </View>
-    )} />
-
-  );
-
-}
 
 export const MyToast = ({ theme, language, toastType = "normal", message = null, showToast = false, closeToastAction }: ToastBoxParamType) => {
 

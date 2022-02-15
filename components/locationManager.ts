@@ -1,72 +1,171 @@
-import { Platform } from "react-native";
-//import { PERMISSIONS, request, check, RESULTS } from "react-native-permissions";
-import { BLOCKED_RESPONSE } from '../constants/constants';
+import * as Location from 'expo-location';
+import { PermissionStatus } from 'expo-modules-core';
+import { GOOGLE_API_KEY } from '../constants/constants';
 
-export const requestGeoLocationPermission = (yourCallBack: (status: boolean | string) => void) => {
 
-    /* try {
-         request(
-             Platform.select({
-                 android: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-                 ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
-             })
-         ).then(res => {
-             if (res == RESULTS.GRANTED) {
-                 //Location is permitted
-                 yourCallBack(true);
-             }
-             else if (res == RESULTS.BLOCKED) {
-                 //Location is is not permitted
-                 yourCallBack(BLOCKED_RESPONSE);
-             }
-             else if (res == RESULTS.UNAVAILABLE) {
-                 //Location is is not permitted
-                 yourCallBack(BLOCKED_RESPONSE);
-             }
-             else {
-                 //Location is is not permitted
-                 yourCallBack(false);
-             }
-         });
-     }
-     catch (err) {
-         //location permission request error
-         yourCallBack(false);
-     }
- 
- */
+
+export const requestGeoLocationPermission = async () : Promise<{
+    status: boolean | string
+}> => {
+    
+    try{
+
+        const isServiceEnabled = await Location.hasServicesEnabledAsync();
+
+        if (!isServiceEnabled) {
+
+            return {
+                status: "notEnabled"
+            }
+            
+        }
+        else{
+
+            const locationVariable = await Location.requestForegroundPermissionsAsync();
+        if(locationVariable.status === PermissionStatus.GRANTED){
+            return {
+                status: true
+            }
+        }
+        else if ( locationVariable.canAskAgain == true && (locationVariable.status == PermissionStatus.UNDETERMINED || locationVariable.status == PermissionStatus.DENIED)){
+
+            return {
+                status: PermissionStatus.DENIED
+            }
+        }
+        else {
+            return {
+                status: PermissionStatus.UNDETERMINED
+            }
+        }
+
+        }
+        
+        
+    }
+    catch (err){
+
+        return {
+            status: PermissionStatus.DENIED
+        }
+     
+}
 
 }
 
-export const checkGeoLocationPermission = (yourCallBack: (status: boolean | string) => void) => {
-    /* try {
-         check(
-             Platform.select({
-                 android: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-                 ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
-             })
-         ).then(res => {
-             if (res == RESULTS.GRANTED) {
-                 //Location is already permitted
-                 yourCallBack(true);
-             }
-             else if (res == RESULTS.BLOCKED) {
-                 //Location is is not permitted
-                 yourCallBack(BLOCKED_RESPONSE);
-             }
-             else if (res == RESULTS.UNAVAILABLE) {
-                 //Location is is not permitted
-                 yourCallBack(BLOCKED_RESPONSE);
-             }
-             else {
-                 //Location is disabled
-                 yourCallBack(false);
-             }
-         });
-     }
-     catch (err) {
-         //location permission check error
-         yourCallBack(false);
-     }
-     */
+
+
+export const getGeoLocationPermission = async () : Promise<{
+    status: boolean | string
+}> => {
+    
+    try{
+
+        const isServiceEnabled = await Location.hasServicesEnabledAsync();
+
+        if (!isServiceEnabled) {
+
+            return {
+                status: "notEnabled"
+            }
+            
+        }
+        else{
+
+        const locationVariable = await Location.requestForegroundPermissionsAsync();
+        if(locationVariable.status === PermissionStatus.GRANTED){
+            return {
+                status: true
+            }
+        }
+        else if ( locationVariable.canAskAgain == true && (locationVariable.status == PermissionStatus.UNDETERMINED || locationVariable.status == PermissionStatus.DENIED)){
+
+            return {
+                status: PermissionStatus.DENIED
+            }
+        }
+        else {
+            return {
+                status: PermissionStatus.UNDETERMINED
+            }
+        }
+    }
+
+        
+    }
+    catch (err){
+
+        return {
+            status: PermissionStatus.DENIED
+        }
+     
+}
+
+}
+
+
+export const getGeoCoords = async () : Promise<{
+    latitude: number, longitude: number
+}> => {
+    try{
+            const { coords } = await Location.getCurrentPositionAsync({accuracy: 6});
+
+                if (coords) {
+
+                  const { latitude, longitude } = coords;
+
+
+                      return {
+                            latitude: latitude,
+                            longitude: longitude
+                      };
+
+                }
+                else{
+
+                    return null
+                }
+        
+        
+    }
+    catch (err){
+
+        return null
+     
+}
+
+}
+
+
+
+export const getGeoCoordsLocationDetails = async (coords: {latitude: number, longitude: number}) : Promise<{
+        country: string, 
+        region: string, 
+        street: string, 
+        CountryCode: string
+}> => {
+    try{
+                 //set Api key
+                 //Location.setGoogleApiKey(GOOGLE_API_KEY);
+                 
+                  let response = await Location.reverseGeocodeAsync(coords);
+                  for (let item of response) {
+      
+                    return {
+                            country:  item.country, 
+                            region:  item.region, 
+                            street:  item.street, 
+                            CountryCode:  item.isoCountryCode
+                    }
+        
+                  }
+        
+        
+    }
+    catch (err){
+        console.log(err)
+        return null
+     
+}
+
 }

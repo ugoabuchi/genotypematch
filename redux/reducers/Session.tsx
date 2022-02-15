@@ -9,7 +9,8 @@ const initialState = {
     }
 
 const initialStateofProfile =  {
-        profile_session: {}
+        profile_session: {},
+        settings: {}
     }
 
 const initialStateofGeneral =  {
@@ -21,7 +22,22 @@ const initialStateofGeneral =  {
         lastLogError: "",
         theme_mode: LightMode,
         storeLocalData: false,
-        bearer: getBearer()
+        bearer: getBearer(),
+        settings: {
+            statusBar: false,
+            fingerprint: false,
+            notification: {
+                background: true,
+                style : "slide",
+                messages: true,
+                likes: true,
+                gifts: true,
+                profile: true,
+                upgrades: true,
+                payments: true,
+                general: true,
+            }
+        }
     }
 }
 

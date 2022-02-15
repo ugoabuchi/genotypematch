@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 import { LogoWTBIcon } from '../components/logo';
 import { MainButton } from '../components/Button';
-import StatusBar from '../components/Statusbar';
 import {
   changeGeneralSession,
   changeProfileSession,
@@ -17,6 +16,7 @@ import { bindActionCreators } from 'redux';
 import { isLoggedIn } from '../components/common';
 import { AlertBoxStateParamType, NavPropsType } from '../types';
 import { MyAlert } from '../components/PopUp';
+import StatusBar from '../components/Statusbar';
 
 const Session = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
   const [alertBox, setAlertBox] = useState<AlertBoxStateParamType>({
@@ -82,6 +82,7 @@ const Session = ({ navigation, route, login_session, profile_session, general_se
 
   return (
     <>
+    <StatusBar/>
       <View style={Theme.SessionStyle.container}>
 
         <View style={Theme.SessionStyle.top}>

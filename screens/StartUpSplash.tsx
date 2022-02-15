@@ -3,7 +3,6 @@ import {
   View,
   Text
 } from 'react-native';
-import StatusBar from '../components/Statusbar';
 import {
   changeGeneralSession,
   changeProfileSession,
@@ -17,6 +16,7 @@ import { SampleUsersImage } from '../components/logo';
 import { PrimaryLoadingIndicator } from '../components/Icon';
 import { SPLASH_SCREEN_TIMEOUT } from '../constants/constants';
 import { StartUpHeaderConfiguration } from '../components/common';
+import StatusBar from '../components/Statusbar';
 
 const StartUpSplash = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
 
@@ -71,7 +71,7 @@ const StartUpSplash = ({ navigation, route, login_session, profile_session, gene
 
   return (
     <>
-    <StatusBar theme={Theme} />
+    <StatusBar/>
       <View style={Theme.StartUpScreenStyle.container}>
         <View style={Theme.StartUpScreenStyle.imageViewBox}>
           <SampleUsersImage />

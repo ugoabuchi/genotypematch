@@ -3,11 +3,11 @@ import {
   BackHandler,
   View
 } from 'react-native';
-import StatusBar from '../components/Statusbar';
 import { connect } from 'react-redux';
 import { NavPropsType } from '../types';
 import { LogoWTIcon } from '../components/logo';
 import { SPLASH_SCREEN_TIMEOUT } from '../constants/constants';
+import StatusBar from '../components/Statusbar';
 
 const SplashScreen = ({ navigation, general_session }: NavPropsType) => {
   useEffect(() => {
@@ -31,7 +31,7 @@ const SplashScreen = ({ navigation, general_session }: NavPropsType) => {
   const Theme = general_session.general_session.theme_mode;
   return (
     <>
-    <StatusBar theme={Theme} />
+    <StatusBar/>
       <View style={Theme.SplashScreenStyle.container}>
         <View style={Theme.SplashScreenStyle.imageViewBox}>
           <LogoWTIcon />

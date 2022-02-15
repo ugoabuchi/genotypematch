@@ -32,9 +32,9 @@ export const AXIOS_HEADER_CONFIG = {
     'Content-Type': "application/x-www-form-urlencoded"
   }
 }
-export const STATUSBAR = true;
 
-export const BLOCKED_RESPONSE = "blocked";
+export const GOOGLE_API_KEY = "AIzaSyBAljLE1KLCXbLJpnJS8_V2ZplzrbrDs68";
+export const STATUSBAR = true;
 
 export const API_RESPONSE = {
   GENERAL: {
@@ -61,7 +61,7 @@ export const API_RESPONSE = {
   MATCHES: {
     SUCCESS: true,
     INVALIDPARAMS: "error-invalid-request-params",
-    NOMATCHESFOUND: "error-no-match-found"
+    INVALIDACCOUNTTYPE: "invalid-account-selection-type"
   },
 }
 
@@ -93,7 +93,7 @@ export const APP_RESPONSE = {
   MATCHES: {
     SUCCESS: "match-found",
     INVALIDPARAMS: "invalid-request-params",
-    NOMATCHESFOUND: "no-match-found"
+    INVALIDACCOUNTTYPE: "account-selection-type-error"
   },
 }
 
@@ -104,6 +104,12 @@ export const TOAST_INTERVAL_ID = 1;
 export const MIN_AGE = 18;
 
 export const MAX_AGE = 74;
+
+export const MATCH_REQUEST_LIMIT = 10;
+
+export const TIME_INTERVAL_BEFORE_NEW_EMAIL_VERIFICATION_CODE_REQUEST = 60;  // in seconds
+
+export const TIME_INTERVAL_BEFORE_NEW_AUTO_REQUEST = 5000;  // in mills
 
 export const REDUX_SESSION_LOCAL_STORE_KEYS = {
   login_session: <reduxStoreLocalKeyType>("login_local_session"),
@@ -122,7 +128,8 @@ export const ACCOUNT_TYPES = {
   ALL: "ALL",
   BASIC: "Basic",
   PREMIUM: "Premium",
-  VIP: "VIP"
+  VIP: "VIP",
+  RANDOM: "Random"
 };
 
 export const GENOTYPE_LIST = {
@@ -172,5 +179,3 @@ export const DEFAULT_AGE_RANGE = [
 
 export const DEFAULT_NO_OF_MATCHES_PER_REQUEST = 20;
 export const DEFAULT_PASSCODE = "ugoabuchi2021123textdio88AAbbb";
-export const TIME_INTERVAL_BEFORE_NEW_EMAIL_VERIFICATION_CODE_REQUEST = 60;  // in seconds
-export const TIME_INTERVAL_BEFORE_NEW_AUTO_REQUEST = 5000;  // in mills

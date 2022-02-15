@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState} from 'react';
 import {
   View,
   Text,
   BackHandler,
   Dimensions,
-  TouchableOpacity
+  TouchableOpacity,
+  Linking,
+  Platform
 } from 'react-native';
 import {
   changeLoginSession,
@@ -14,23 +16,29 @@ import {
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { LogoIcon } from '../components/logo';
-import StatusBar from '../components/Statusbar';
 import { Image } from "react-native";
 import { Badge } from 'react-native-paper';
-import { getAge, getCountryByIndex, getFileBase64FromURL, isLoggedIn, SvgImager } from '../components/common';
-import { MyAlert, MyModal } from '../components/PopUp';
+import { getAge, getCountryByIndex, getCountryIndexByCountryCode, getCountryStateIndexByCountryCodeandState, getMyCountryCodeName, isLoggedIn, myCountryList, myCountryStatelist, SvgImager } from '../components/common';
+import { MyAlert } from '../components/PopUp';
 import { AccountListDropDown, AgeListDropDown, CountryListDropDown, CountryStateListDropDown, GenderListDropDown, GenotypeListDropDown } from '../components/ListDropDown';
 import { getMatchResults } from '../components/axios';
 import { AlertBoxStateParamType, MatchFilterType, NavPropsType, ModalStateType, MatchesCardType, mCard, CardType, buttonParamType } from '../types';
 import { BloodBagIcon, FemaleGenderIcon, FilterIcon, GiftIcon, MaleGenderIcon, MenuIcon, NopeIcon, PREMIUMDisplayIcon, VerifiedUser100Icon, VIPDisplayIcon, YupIcon, BASICDisplayIcon, VerifiedUser50Icon, VerifiedUser10Icon, LoadIndicator, PrimaryLoadingIndicator, LocationIcon } from '../components/Icon';
 import { PulseViewAnimation } from '../components/Animations';
-import { BLOCKED_RESPONSE, ReQUEST_IMAGE_URL } from '../constants/constants';
+import { ACCOUNT_TYPES, MATCH_REQUEST_LIMIT, ReQUEST_IMAGE_URL } from '../constants/constants';
+import { requestGeoLocationPermission, getGeoLocationPermission, getGeoCoords, getGeoCoordsLocationDetails } from '../components/locationManager';
 import SwipeCards from 'react-native-swipe-cards-deck';
 import { SubButton } from '../components/Button';
+import { PermissionStatus } from 'expo-location';
+import StatusBar from '../components/Statusbar';
+import { ModalPopUpBox } from '../components/Modal';
+
 const GMHome = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
 
   const Theme = general_session.general_session.theme_mode;
   const Lang = general_session.general_session.Language;
+
+  //set useref for allocated background intervals
 
   const [alertBox, setAlertBox] = useState<AlertBoxStateParamType>({
     alertType: "normal",
@@ -44,33 +52,42 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     confirmAction: () => { }
   });
 
-  const [filterValues, setFilterValues] = useState<MatchFilterType>({
-    account: 0,
-    country: 0,
-    state: 0,
-    gender: 0,
-    genotype: 0,
-    agerange: 0
 
-  })
+  const [accoountIndex, setAccountIndex] = useState<number>(4)
+
+  const [countryIndex, setCountryIndex] = useState<number>(0)
+
+  const [stateIndex, setStateIndex] = useState<number>(0)
+
+  const [genderIndex, setGenderIndex] = useState<number>(3)
+
+  const [genotypeIndex, setGenotypeIndex] = useState<number>(7)
+
+  const [agerangeIndex, setAgerangeIndex] = useState<number>(7)
+
+  const [requestOffset, setRequestOffset] = useState<number>(0);
 
   const [temporaryFilterValues, setTemporaryFilterValues] = useState<MatchFilterType>({
-    account: 0,
+    account: 4,
     country: 0,
     state: 0,
-    gender: 0,
-    genotype: 0,
-    agerange: 0
+    gender: 3,
+    genotype: 7,
+    agerange: 7
 
   })
 
-  const [modalState, setModalState] = useState<ModalStateType>({
-    title: null,
-    confirmText: null,
-    confirmAction: null,
-    initialOpenAction: null,
-    showModal: false
-  })
+  const [countryDefaultIndex, setCountryDefaultIndex] = useState<number>(0);
+
+  const [countryStateDefaultIndex, setCountryStateDefaultIndex] = useState<number>(0);
+
+  const [modalFilterTitle, setModalFilterTitle] = useState<string>(null);
+
+  const [showMyModalFilter, setShowMyModalFilter] = useState<boolean>(false);
+
+  const [showModalFilterConfirm, setShowModalFilterConfirm] = useState<boolean>(true);
+
+  const [modalFilterConfirmText, setModalFilterConfirmText] = useState<string>(null);
 
   const [cards, setCard] = useState<MatchesCardType[]>(null);
 
@@ -84,15 +101,20 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     enabled: boolean | string,
     loading: buttonParamType,
     message: string
-  }>({
-    enabled: false,
+    }>({
+    enabled: PermissionStatus.DENIED,
     message: null,
     loading: {
       isLoader: true,
       showLoader: false
     }
   });
-  //lets diable saving to local for now until we done with designs, in redux
+
+
+
+
+
+
 
 
   useEffect(() => {
@@ -114,10 +136,19 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     });
 
 
-    //loadInitializers();
 
+
+    //update permission state
+    getGeoLocationPermission_sub()
 
   }, [])
+
+  useEffect(()=>{
+    if(isLocation.enabled == true && isLoading == false)
+    {
+      loadMatches(true);
+    }
+  }, [isLocation])
 
   isLoggedIn({
     login_session: login_session,
@@ -134,51 +165,254 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     });
   }
 
-  const loadMatches = async () => {
-    setCard([
+
+  const filterAccepted = () : {value: boolean, message ?: string} => {
+
+    const {accounttype} = profile_session.profile_session;
+    //check basic plan settings
+    if(accounttype == ACCOUNT_TYPES.VIP)
+    {
+      return {
+        value: true
+      }
+    }
+    else if(accounttype == ACCOUNT_TYPES.PREMIUM)
+    {
+      if(genotypeIndex != 7 || accoountIndex != 4)
+      {
+        return {
+          value: false,
+          message: Lang.GENERAL.VIPUPGRADE
+        }
+      }
+      else
+      {
+        return {
+          value: true
+        }
+      }
+    }
+    else
+    {
+      if(countryIndex != countryDefaultIndex || stateIndex != countryStateDefaultIndex || genderIndex != 3 || genotypeIndex != 7 || accoountIndex != 4 || agerangeIndex != 7)
+      {
+        return {
+          value: false,
+          message: Lang.GENERAL.ACCOUNTUPGRADE
+        }
+      }
+      else
+      {
+        return {
+          value: true
+        }
+      }
+    }
+
+  }
+
+
+  const loadMatches =  async (firstmount: boolean) => {
+
+    if(isLoading != true)
+    {
+      setIsLoading(true);
+    }
+
+   //check filter
+
+   const filteredValue = filterAccepted();
+   if(filteredValue.value != true){
+
+    //set previous filter options
+                  setAccountIndex(temporaryFilterValues.account);
+                  setCountryIndex(temporaryFilterValues.country);
+                  setStateIndex(temporaryFilterValues.state);
+                  setGenderIndex(temporaryFilterValues.gender);
+                  setGenotypeIndex(temporaryFilterValues.genotype);
+                  setAgerangeIndex(temporaryFilterValues.agerange);
+    
+
+    //show alert
+   if(firstmount == false)
+   {
+    setAlertBox({
+      ...alertBox,
+      alertType: "warning",
+      title: null,
+      message: filteredValue.message,
+      cancelText: Lang.GENERAL.OK,
+      showConfirm: false,
+      showAlert: true,
+      cancelAction: () => cancelAlert(),
+    })
+   }
+
+   setCard([]);
+
+   }
+   else
+   {
+
+    await getGeoLocationPermission_sub();
+
+   if(isLocation.enabled == true)
+   {
+      //get Location coords
+      const coords = await getGeoCoords();
+      if(coords)
+      {
+      //set and send request to server
+      //send to API Server
+
+      const reverseCoords = await getGeoCoordsLocationDetails(coords);
+      if(reverseCoords == undefined || reverseCoords == null)
+      {
+        
+        if(firstmount == false)
+        {
+
+          setAlertBox({
+            ...alertBox,
+            alertType: "warning",
+            title: null,
+            message: Lang.GENERAL.LOCATION_DETAILS_UNDEFINED,
+            cancelText: Lang.GENERAL.OK,
+            showConfirm: false,
+            showAlert: true,
+            cancelAction: () => cancelAlert(),
+          })
+
+        }
+
+          setCard([]);
+          setIsLoading(false);
+      }
+      else
+      {
+
+      if(cards == null)
+      {
+        const countryIndexValue : number = getCountryIndexByCountryCode(reverseCoords.CountryCode);
+        const countryStateIndexValue : number = getCountryStateIndexByCountryCodeandState(reverseCoords.CountryCode, reverseCoords.region);
+
+        setCountryIndex(countryIndexValue);
+        setStateIndex(countryStateIndexValue);
+        setCountryDefaultIndex(countryIndexValue);
+        setCountryStateDefaultIndex(countryStateIndexValue)
+      }
+
+      const params = new URLSearchParams();
+      params.append('userid', profile_session.profile_session.username);
+      params.append('token',profile_session.profile_session.token);
+      params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+      params.append('country', reverseCoords.CountryCode);
+      params.append('city', reverseCoords.region);
+      params.append('account',accoountIndex+"");
+      params.append('gender',genderIndex+"");
+      params.append('bloodgroup',genotypeIndex+"");
+      params.append('agerange',agerangeIndex+"");
+      params.append('reqcountry', getMyCountryCodeName(myCountryList()[countryIndex]));
+      params.append('reqcity',(myCountryStatelist(getMyCountryCodeName(myCountryList()[countryIndex])))[stateIndex]);
+      params.append('limit',MATCH_REQUEST_LIMIT+"");
+      params.append('offset',requestOffset+"");
+      
+      //const APP_REQUEST_API = await getMatchResults(params, Lang);
+      
+
+        setCard([
+          {key: 0, id: "0", name: "Mathew Fortune", gender: "Male", lastseencountry: "NG", lastseencity: "Lagos", lastseencoords: "8.5894BLARK6.9758", distance: "400", dob: "1985-12-09", description: "We getting the ball rolling", blooggroup: "CC", accounttype: "Basic", url: "test.png", pverified: "true", bverified:"true", online: "true"},
+          {key: 1, id: "1", name: "Angela Jones", gender: "Female", lastseencountry: "US", lastseencity: "Ohio", lastseencoords: "8.5894BLARK6.9758", distance: "400", dob: "1985-12-09", description: "We getting the ball rolling", blooggroup: "CC", accounttype: "Basic", url: "test1.png", pverified: "true", bverified:"false", online: "false"},
+          {key: 2, id: "2", name: "Divine Adaugo", gender: "Male", lastseencountry: "GH", lastseencity: "Kumasi", lastseencoords: "8.5894BLARK6.9758", distance: "10", dob: "1980-09-10", description: "Gotch you right there, serios people only", blooggroup: "AA", accounttype: "VIP", url: "test.png", pverified: "true", bverified:"true", online: "true"},
+          {key: 3, id: "3", name: "Kingsely Pius", gender: "Male", lastseencountry: "NG", lastseencity: "Lagos", lastseencoords: "8.5894BLARK6.9758", distance: "20", dob: "1999-02-01", description: "bla bla bla bla bla bla bla bla", blooggroup: "SS", accounttype: "Basic", url: "test1.png", pverified: "true", bverified:"false", online: "false"},
+          
+        ]);
+        
+      }
+
+
+      
+
+      }
+      else
+      {
+
+
+      
+      setAlertBox({
+        ...alertBox,
+        alertType: "warning",
+        title: null,
+        message: Lang.GENERAL.LOCATION_COORDS_NOT_FOUND,
+        cancelText: Lang.GENERAL.OK,
+        showConfirm: false,
+        showAlert: true,
+        cancelAction: () => cancelAlert(),
+      })
+
+      setCard([]);
+      }
+    //empty card should be repreented with [] and not null, so that the background location checker would not mess with data fetching
+    //set default to empty card
+    //setCard([]);
+    
+
+    //fetch card
+    /*setCard([
       { key: 0, id: 0, name: "Mathew Fortune", gender: "Male", locationcode: "105.112.154.62blarkNigeriablarkNGblarkhttps:\/\/cdn.ipwhois.io\/flags\/ng.svgblarkLagosblark6.5243793blark3.3792057", distance: "20", dob: "1996-26-12", description: "Just a disction about me", blooggroup: "AS", accounttype: "Premium", url: "xxx.jpg", pverified: "true", bverified: "true", isOnline: "true" },
       { key: 1, id: 1, name: "Angela Jones", gender: "Female", locationcode: "105.112.154.62blarkUSAblarkUSblarkhttps:\/\/cdn.ipwhois.io\/flags\/us.svgblarkDenverblark6.5243793blark3.3792057", distance: "400", dob: "1985-12-09", description: "We getting the ball rolling", blooggroup: "CC", accounttype: "Basic", url: "test.png", pverified: "true", bverified: "false", isOnline: "false" },
       { key: 2, id: 2, name: "Divine Adaugo", gender: "Male", locationcode: "105.112.154.62blarkCanadablarkCAblarkhttps:\/\/cdn.ipwhois.io\/flags\/ca.svgblarkTorontoblark6.5243793blark3.3792057", distance: "10", dob: "1980-09-10", description: "Gotch you right there, serios people only", blooggroup: "AA", accounttype: "VIP", url: "test1.png", pverified: "true", bverified: "true", isOnline: "true" },
       { key: 3, id: 3, name: "Kingsely Pius", gender: "Male", locationcode: "105.112.154.62blarkGhanablarkGHblarkhttps:\/\/cdn.ipwhois.io\/flags\/gh.svgblarkAccrablark6.5243793blark3.3792057", distance: "20", dob: "1999-02-01", description: "bla bla bla bla bla bla bla bla", blooggroup: "SS", accounttype: "Basic", url: "test.png", pverified: "true", bverified: "false", isOnline: "false" },
 
-    ])
-  }
-  const loadInitializers = async () => {
+    ]);
+    */
+    
+    
 
-    console.log("what")
-    //check if location is enabled
-    /*if (isLocation.enabled == false || isLocation.enabled == BLOCKED_RESPONSE) {
+   }
+   else
+   {
+
+    //update location states params
+    rquestLocationPermission_sub();
+    
+   }
+
+
+   }
+
+
+
+   
+   setIsLoading(false);
+    
+   
+
+  }
+
+  const getGeoLocationPermission_sub = async () => {
+
+      const {status} = await getGeoLocationPermission();
       setisLocation({
         ...isLocation,
+        enabled: status,
+        message: status == true ? null : (status == PermissionStatus.DENIED ? Lang.GENERAL.DEFAULT_LOCATION_DENIED_TEXT : Lang.GENERAL.DEFAULT_LOCATION_BLOCKED_TEXT),
         loading: {
           ...isLocation.loading,
           showLoader: false
-        }
+        },
       });
 
-       checkGeoLocationPermission((enabledValue) => {
-         setisLocation({
-           ...isLocation,
-           enabled: enabledValue,
-           message: enabledValue != BLOCKED_RESPONSE ? null : Lang.GENERAL.DEFAULT_LOCATION_BLOCKED_OR_UNAVAILABLE_TEXT,
-           loading: {
-             ...isLocation.loading,
-             showLoader: false
-           }
-         });
-       });
-
-  }
-*/
-
 
   }
 
 
-  const getGeoLocationPermission = async () => {
-    console.log("hi")
+  const rquestLocationPermission_sub = async () => {
     //request location permission
-    /*if (isLocation.enabled == false || isLocation.enabled == BLOCKED_RESPONSE) {
+
+    
+    if (isLocation.enabled != true) {
+      
       setisLocation({
         ...isLocation,
         loading: {
@@ -187,100 +421,93 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         }
       });
   
-      requestGeoLocationPermission((enabledValue) => {
-  
-        setisLocation({
-          ...isLocation,
-          enabled: enabledValue,
-          message: enabledValue != BLOCKED_RESPONSE ? null : Lang.GENERAL.DEFAULT_LOCATION_BLOCKED_OR_UNAVAILABLE_TEXT,
-          loading: {
-            ...isLocation.loading,
-            showLoader: false
-          }
-        });
-  
+      const {status} = await requestGeoLocationPermission();
+      setisLocation({
+        ...isLocation,
+        enabled: status,
+        message: status == true ? null : ((status == PermissionStatus.DENIED || status == "notEnabled") ? Lang.GENERAL.DEFAULT_LOCATION_DENIED_TEXT : Lang.GENERAL.DEFAULT_LOCATION_BLOCKED_TEXT),
+        loading: {
+          ...isLocation.loading,
+          showLoader: false
+        }
       });
-  
-    }
-    */
 
+      if(status != true)
+      {
+        setAlertBox({
+          ...alertBox,
+          alertType: "error",
+          title: null,
+          message: status == "notEnabled" ? Lang.GENERAL.ENABLE_LOCATION_SERVICES : Lang.GENERAL.LOCATION_BLOCKED_OR_UNAVAILABLE_FIX_ERROR_TEXT,
+          cancelText: Lang.GENERAL.OK,
+          showConfirm: false,
+          showAlert: true,
+          cancelAction: () => cancelAlert(),
+        })
+      }
 
   }
 
-  useEffect(() => {
-    if (isLocation.enabled == true) {
-      loadMatches();
-    }
-    else if (isLocation.enabled == BLOCKED_RESPONSE) {
-      setAlertBox({
-        ...alertBox,
-        alertType: "error",
-        title: null,
-        message: Lang.GENERAL.LOCATION_BLOCKED_OR_UNAVAILABLE_FIX_ERROR_TEXT,
-        cancelText: Lang.GENERAL.OK,
-        showConfirm: false,
-        showAlert: true,
-        cancelAction: () => cancelAlert(),
-      })
-    }
-  }, [isLocation])
+
+}
+
+
+const handleOpenSettings = () => {
+  if (Platform.OS === 'ios') {
+    Linking.openURL('app-settings:');
+  } else {
+    Linking.openSettings();
+  }
+};
+
+ 
   //set Account
-  const setAccount = (index: any) => {
-    setFilterValues({
-      ...filterValues,
-      account: index
-    })
+  const setAccount = (index: number) => {
+    setAccountIndex(index);
   }
 
   //set Age range
-  const setAgeRange = (index: any) => {
-    setFilterValues({
-      ...filterValues,
-      agerange: index
-    })
+  const setAgeRange = (index: number) => {
+    setAgerangeIndex(index)
   }
 
   //set Genotype
-  const setGenotype = (index: any) => {
-    setFilterValues({
-      ...filterValues,
-      genotype: index
-    })
+  const setGenotype = (index: number) => {
+    setGenotypeIndex(index)
   }
 
   //set Country Code
   const setCountry = (index: number) => {
-    setFilterValues({
-      ...filterValues,
-      country: index,
-      state: 0
-    })
+    setCountryIndex(index);
+    setStateIndex(0);
   }
 
   //set Country State
   const setCountryState = (index: number) => {
-    setFilterValues({
-      ...filterValues,
-      state: index
-    })
+    setStateIndex(index)
   }
 
   //set Gender
-  const setGender = (index: any) => {
-    setFilterValues({
-      ...filterValues,
-      gender: index
-    })
+  const setGender = (index: number) => {
+    setGenderIndex(index)
   }
 
   //Filter Search Action
   const filterSearch = () => {
-    setModalState({
-      ...modalState,
-      showModal: false
-    })
+    setShowMyModalFilter(false);
+    loadMatches(false);
 
-    //Perform filter search operations
+  }
+
+  const filterClose = () => {
+      setShowMyModalFilter(false);
+      //setAccountIndex(temporaryFilterValues.account);
+                  //setCountryIndex(temporaryFilterValues.country);
+                  //setStateIndex(temporaryFilterValues.state);
+                  //setGenderIndex(temporaryFilterValues.gender);
+                  //setGenotypeIndex(temporaryFilterValues.genotype);
+                  //setAgerangeIndex(temporaryFilterValues.agerange);
+                 
   }
 
   //hold previous temp filter values when in filter menu
@@ -370,7 +597,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
   //Home Filter Component
   const FilterContent = () => (
-    <View>
+      <View>
 
       <View style={Theme.GMHomeScreenStyle.HomeFilterContainer}>
         <View style={Theme.GMHomeScreenStyle.HomeFilterTextBox}>
@@ -380,9 +607,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         <View style={Theme.GMHomeScreenStyle.HomeFilterComponentBox}>
           <AccountListDropDown
             theme={Theme}
-            defaultIndex={filterValues.account}
+            defaultIndex={accoountIndex}
             language={Lang}
-            yourCallBack={(index) => { setAccount(index) }}
+            yourCallBack={(index) => {setAccount(index)}}
           />
 
         </View>
@@ -398,9 +625,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         <View style={Theme.GMHomeScreenStyle.HomeFilterComponentBox}>
           <CountryListDropDown
             theme={Theme}
-            defaultIndex={filterValues.country}
+            defaultIndex={countryIndex}
             language={Lang}
-            yourCallBack={(index) => { setCountry(index) }}
+            yourCallBack={(index) => {setCountry(index)}}
           />
 
         </View>
@@ -416,10 +643,10 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         <View style={Theme.GMHomeScreenStyle.HomeFilterComponentBox}>
           <CountryStateListDropDown
             theme={Theme}
-            countryCode={getCountryByIndex(filterValues.country).code}
-            defaultIndex={filterValues.state}
+            countryCode={getCountryByIndex(countryIndex).code}
+            defaultIndex={stateIndex}
             language={Lang}
-            yourCallBack={(index) => { setCountryState(index) }}
+            yourCallBack={(index) => {setCountryState(index)}}
           />
 
         </View>
@@ -435,9 +662,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         <View style={Theme.GMHomeScreenStyle.HomeFilterComponentBox}>
           <GenderListDropDown
             theme={Theme}
-            defaultIndex={filterValues.gender}
+            defaultIndex={genderIndex}
             language={Lang}
-            yourCallBack={(index) => { setGender(index) }}
+            yourCallBack={(index) => {setGender(index)}}
           />
 
         </View>
@@ -453,9 +680,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         <View style={Theme.GMHomeScreenStyle.HomeFilterComponentBox}>
           <GenotypeListDropDown
             theme={Theme}
-            defaultIndex={filterValues.genotype}
+            defaultIndex={genotypeIndex}
             language={Lang}
-            yourCallBack={(index) => { setGenotype(index) }}
+            yourCallBack={(index) => {setGenotype(index)}}
           />
 
         </View>
@@ -470,9 +697,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         <View style={Theme.GMHomeScreenStyle.HomeFilterComponentBox}>
           <AgeListDropDown
             theme={Theme}
-            defaultIndex={filterValues.agerange}
+            defaultIndex={agerangeIndex}
             language={Lang}
-            yourCallBack={(index) => { setAgeRange(index) }}
+            yourCallBack={(index) => {setAgeRange(index)}}
           />
 
         </View>
@@ -480,21 +707,21 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
     </View>
 
-
-  )
+    )
+    
 
 
   //Card Deck Component
   const HomeCardDeck = ({ card }: CardType) => {
-
-    const [profileImageSrc, setprofileImageSrc] = useState(null);
+    
+    
     const [countryImageSrc, setCountryImageSrc] = useState(null);
     const [imagesLoading, setImagesLoading] = useState<{
       profileImage: boolean,
-      countryIcon: boolean
+      countryImage: Boolean
     }>({
       profileImage: true,
-      countryIcon: true
+      countryImage: true
     });
 
 
@@ -503,23 +730,17 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
       async function loadStaticleImages() {
 
 
-        getFileBase64FromURL(ReQUEST_IMAGE_URL + "/" + card.url, (base64String) => {
-          setCountryImageSrc((card.locationcode.split("blark"))[3]);
-          setprofileImageSrc(`data:image/png;base64,${base64String}`);
+        setCountryImageSrc("https://cdn.ipwhois.io/flags/"+(card.lastseencountry).toLowerCase()+".svg");
           setImagesLoading({
             ...imagesLoading,
-            profileImage: false,
-            countryIcon: false
+            countryImage: false
           });
-        });
 
       }
 
       loadStaticleImages();
 
     }, [])
-
-
 
 
     return (
@@ -533,7 +754,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
               <View style={Theme.HomeMatchBox.bc1c1child1}>
 
                 {
-                  imagesLoading.countryIcon == true
+                  imagesLoading.countryImage == true
                     ?
                     (
                       <View style={Theme.HomeMatchBox.bc1c1childLoaaderContainer}><PrimaryLoadingIndicator theme={Theme} /></View>
@@ -556,25 +777,18 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
             <View style={Theme.HomeMatchBox.bc1c2}>
 
-
-              <View style={imagesLoading.profileImage == true ? Theme.HomeMatchBox.bc1c2child1 : Theme.HomeMatchBox.bc1c2childContainer}>
-                {
-                  imagesLoading.profileImage == true
-                    ?
-                    (
+                      <View style={[Theme.HomeMatchBox.bc1c2child1, {display: imagesLoading.profileImage == true ? "flex" : "none"}]}>
                       <LoadIndicator theme={Theme} />
-                    )
-                    :
-                    (
+                      </View>
+
+                      <View style={[Theme.HomeMatchBox.bc1c2childContainer, {display: imagesLoading.profileImage == false ? "flex" : "none"}]}>
                       <Image
-                        source={{ uri: profileImageSrc }}
+                        source={{ uri: ReQUEST_IMAGE_URL + "/" + card.url }}
                         style={Theme.HomeMatchBox.bc1c2childContainerImage}
                         resizeMode='cover'
+                        onLoadEnd={() => setImagesLoading({...imagesLoading, profileImage: false})}
                       />
-
-                    )
-                }
-              </View>
+                      </View>
 
 
             </View>
@@ -627,7 +841,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
                   <Text numberOfLines={1} style={Theme.HomeMatchBox.bc2c1c2child1Text} adjustsFontSizeToFit={true} >{Lang.GENERAL.LOCATION}</Text>
                 </View>
                 <View style={Theme.HomeMatchBox.b2c1c2child2}>
-                  <Text numberOfLines={1} style={Theme.HomeMatchBox.bc2c1c2child2Text}>{(card.locationcode.split("blark"))[4] + ", " + (card.locationcode.split("blark"))[2] + " - " + card.distance + Lang.GENERAL.KMAWAY}</Text>
+                  <Text numberOfLines={1} style={Theme.HomeMatchBox.bc2c1c2child2Text}>{card.lastseencountry + ", " + card.lastseencity + " - " + card.distance + Lang.GENERAL.KMAWAY}</Text>
                 </View>
 
               </View>
@@ -802,12 +1016,12 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
               <PulseViewAnimation propData={<LocationIcon theme={Theme} />} />
             </View>
             <View style={Theme.HomeMatchBox.locationButtonBox}>
-              <SubButton theme={Theme} language={Lang} title={Lang.GENERAL.DEFAULT_GRANT_LOCATION_REQUEST_TEXT} isWithLoader={isLocation.loading} onAction={() => getGeoLocationPermission()} />
+              <SubButton theme={Theme} language={Lang} title={(isLocation.enabled == PermissionStatus.DENIED || isLocation.enabled == "notEnabled") ? Lang.GENERAL.DEFAULT_GRANT_LOCATION_REQUEST_TEXT : Lang.GENERAL.DEFAULT_GO_TO_DEVICE_LOCATION_PERMISSION_SETTING_TEXT} isWithLoader={isLocation.loading} onAction={() => isLocation.enabled == PermissionStatus.DENIED ? rquestLocationPermission_sub() : handleOpenSettings()} />
             </View>
           </View>
 
           <View style={Theme.HomeMatchBox.locationTextContainer}>
-            <Text numberOfLines={1} style={message == Lang.GENERAL.DEFAULT_LOCATION_BLOCKED_OR_UNAVAILABLE_TEXT ? Theme.HomeMatchBox.locationTextBlocked : Theme.HomeMatchBox.locationText} adjustsFontSizeToFit={true} > {(message == "" || message == null) ? Lang.GENERAL.DEFAULT_LOCATION_REQUEST_TEXT : message}</Text>
+            <Text numberOfLines={1} style={(isLocation.enabled == PermissionStatus.DENIED || isLocation.enabled == "notEnabled") ? Theme.HomeMatchBox.locationText : Theme.HomeMatchBox.locationTextBlocked} adjustsFontSizeToFit={true} > {(message == "" || message == null) ? Lang.GENERAL.DEFAULT_LOCATION_REQUEST_TEXT : message}</Text>
           </View>
 
         </View>
@@ -847,7 +1061,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
   return (
     <>
-    <StatusBar theme={Theme} />
+    <StatusBar/>
       <View style={Theme.GMHomeScreenStyle.container}>
         <View style={Theme.GMHomeScreenStyle.header}>
 
@@ -869,7 +1083,24 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
               <TouchableOpacity
                 style={Theme.HomeMatchBox.headerFilterContainer}
 
-                onPress={() => setModalState({ ...modalState, title: Lang.GENERAL.FILTEROPTIONS, confirmText: Lang.GENERAL.SEARCH, confirmAction: () => filterSearch(), initialOpenAction: () => storeTemporaryFilterValue(filterValues), showModal: true })}
+                onPress={ () => {
+                  storeTemporaryFilterValue({
+
+                    account: accoountIndex,
+                    country: countryIndex,
+                    state: stateIndex,
+                    gender: genderIndex,
+                    genotype: genotypeIndex,
+                    agerange: agerangeIndex
+  
+                  });
+                  setModalFilterTitle(Lang.GENERAL.FILTEROPTIONS);
+                  setShowModalFilterConfirm(true);
+                  setModalFilterConfirmText(Lang.GENERAL.SEARCH);
+                  setShowMyModalFilter(true);
+
+                }
+              }
 
               >
                 <Text numberOfLines={1} style={Theme.HomeMatchBox.headerFilterContainerText} adjustsFontSizeToFit={true} >{Lang.GENERAL.FILTERICONLABEL}</Text>
@@ -885,7 +1116,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
                 (
 
-                  (cards != null && cards.length > 0)
+                  (isLoading == false && cards != null)
 
                     ?
 
@@ -896,7 +1127,13 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
                       cards={cards}
                       renderCard={(cardData: MatchesCardType) => <HomeCardDeck card={cardData} />}
                       keyExtractor={(cardData: MatchesCardType) => String(cardData.key)}
-                      renderNoMoreCards={() => <></>}
+                      renderNoMoreCards={() => <View style={{
+                        backgroundColor: "#000000",
+                        width: "50%",
+                        height: "50%"
+                      }}>
+
+                      </View>}
 
                       actions={{
                         nope: { onAction: handleNope, view: <NopeSwipeDesign /> },
@@ -908,7 +1145,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
                       smoothTransition={true}
                       hasMaybeAction={true}
                     //stack={true}
-                    //stackDepth={2}
+                    stackDepth={1}
                     />
 
                     :
@@ -926,17 +1163,21 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
           </View>
         </View>
       </View>
-      <MyModal
-        theme={Theme}
-        language={Lang}
-        title={modalState.title}
-        confirmText={modalState.confirmText}
-        confirmAction={modalState.confirmAction}
-        showModal={modalState.showModal}
-        closeAction={() => { setModalState({ ...modalState, showModal: false }); setFilterValues(temporaryFilterValues); }}
-        initialOpenAction={modalState.initialOpenAction}
-        content={<FilterContent />}
+
+      <ModalPopUpBox
+      
+      theme = {Theme}
+      language = {Lang}
+      title = {modalFilterTitle}
+      content = {<FilterContent/>}
+      confirmText = {modalFilterConfirmText}
+      confirmAction = {() => filterSearch()}
+      closeAction = {()=> filterClose()}
+      showConfirm = {showModalFilterConfirm}
+      showModal = {showMyModalFilter}
+      
       />
+
       <MyAlert
         theme={Theme}
         language={Lang}

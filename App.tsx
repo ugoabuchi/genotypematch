@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import AppStore from './redux/store/AppStore';
 import * as Font from 'expo-font';
-import StatusBar from './components/Statusbar';
 
 const store = AppStore();
 

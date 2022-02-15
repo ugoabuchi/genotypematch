@@ -1,11 +1,10 @@
 import React from "react";
-import { StatusBar as Networkbarr } from "react-native";
+import { StatusBar as NetworkBar } from "expo-status-bar";
 import { STATUSBAR } from "../constants/constants";
 import { StatusBarType } from "../types";
-const StatusBar = ({ theme, hidden = STATUSBAR }: StatusBarType) => {
-    const Theme = theme;
+const StatusBar = ({hidden = STATUSBAR }: StatusBarType) => {
     return (
-        <Networkbarr backgroundColor={Theme.GenralComponentColors.PRIMARY} hidden={hidden} />
+        <NetworkBar style="dark" hidden={hidden} />
     );
 }
 

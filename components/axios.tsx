@@ -164,7 +164,7 @@ const getUsernameExist = async (params: URLSearchParams, language: any, useCase:
 };
 
 
-const getMatchResults = async (params: URLSearchParams, language: any, useCase: useCaseForSession): Promise<APIResponse> => {
+const getMatchResults = async (params: URLSearchParams, language: any): Promise<APIResponse> => {
   
   params.append('action', 'updatematches');
   
@@ -175,14 +175,15 @@ const getMatchResults = async (params: URLSearchParams, language: any, useCase: 
           {
               return {
                 response: APP_RESPONSE.MATCHES.SUCCESS,
-                message: language.GENERAL.RESPONSE.MATCHES.SUCCESS
+                message: language.GENERAL.RESPONSE.MATCHES.SUCCESS,
+                data: userData.data
               }
           }
-          else if(userData.response == API_RESPONSE.MATCHES.NOMATCHESFOUND)
+          else if(userData.response == API_RESPONSE.MATCHES.INVALIDACCOUNTTYPE)
           {
             return {
-              response: APP_RESPONSE.MATCHES.NOMATCHESFOUND,
-              message: language.GENERAL.RESPONSE.MATCHES.NOMATCHESFOUND
+              response: APP_RESPONSE.MATCHES.INVALIDACCOUNTTYPE,
+              message: language.GENERAL.RESPONSE.MATCHES.INVALIDACCOUNTTYPE
             };
           }
           else if(userData.response == API_RESPONSE.MATCHES.INVALIDPARAMS)

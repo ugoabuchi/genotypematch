@@ -8,8 +8,12 @@ const ENGLISH = {
     DEFAULT_CARD_LOAD_TEXT: "Fetching matches, please wait ...",
     DEFAULT_GRANT_LOCATION_REQUEST_TEXT: "GRANT PERMISSION",
     DEFAULT_LOCATION_REQUEST_TEXT: "Location permission required",
-    DEFAULT_LOCATION_BLOCKED_OR_UNAVAILABLE_TEXT: "Location permission blocked",
-    LOCATION_BLOCKED_OR_UNAVAILABLE_FIX_ERROR_TEXT: "Unblock location permission device settings",
+    DEFAULT_LOCATION_BLOCKED_TEXT: "Location permission blocked",
+    DEFAULT_LOCATION_DENIED_TEXT: "Location permission denied",
+    DEFAULT_GO_TO_DEVICE_LOCATION_PERMISSION_SETTING_TEXT: "Open Settings",
+    ENABLE_LOCATION_SERVICES: "Enable location services",
+    LOCATION_BLOCKED_OR_UNAVAILABLE_FIX_ERROR_TEXT: "Grant location permission",
+    LOCATION_COORDS_NOT_FOUND: "Couldn't fectch your\nlocation coordinates",
     DEFAULT_INPUTBOX_PLACEHOLDER: "Enter value here",
     DEFAULT_TOAST_TEXT: "Toast message...",
     BEFORE_EXIT_TOAST_TEXT: "Press back again to exit",
@@ -59,6 +63,9 @@ const ENGLISH = {
     YRS: "yrs",
     NAME: "Name",
     LOCATION: "Location",
+    LOCATION_DETAILS_UNDEFINED: "Location details undefined\ncheck your network connection",
+    VIPUPGRADE: "Your filter options\nrequires VIP",
+    ACCOUNTUPGRADE: "Your filter options\nrequire VIP or PREMIUM",
     ABOUT: "About",
     NAMEERRORTEXT: {
       ONE: "Last & First name only, atleast 3 Letters each",
@@ -114,7 +121,7 @@ const ENGLISH = {
       MATCHES: {
         SUCCESS: "Match result available",
         INVALIDPARAMS: "Invalid request, browse the app properly",
-        NOMATCHESFOUND: "Match result not found"
+        INVALIDACCOUNTTYPE: "Invalid account type,\nuse the app properly"
       },
 
     },

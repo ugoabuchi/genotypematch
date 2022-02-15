@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper'
 import { changeLoginSession, changeProfileSession, changeGeneralSession } from '../redux/actions/Session';
 import { connect } from 'react-redux';
@@ -16,25 +16,12 @@ import {
     Switch
 } from 'react-native-paper';
 import { NavPropsType } from '../types';
-import { getFileBase64FromURL, logOut } from '../components/common';
+import { logOut } from '../components/common';
 
 const MenuDrawer = ({ navigation, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
 
-    const [profileImageSrc, setprofileImageSrc] = useState(null);
-    useEffect(() => {
-
-        async function loadStaticImages() {
-
-            getFileBase64FromURL("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=750&q=80", (base64String) => {
-                setprofileImageSrc(`data:image/png;base64,${base64String}`);
-            });
-
-        }
-
-        loadStaticImages();
-
-
-    }, []);
+    const [profileImageLoading, setProfileImageLoading] = useState(true);
+ 
     return (
         <View style={{ flex: 1 }}>
             <DrawerContentScrollView>
@@ -43,8 +30,9 @@ const MenuDrawer = ({ navigation, login_session, profile_session, general_sessio
                         <View style={{ flexDirection: 'row', marginTop: 15 }}>
                             <Avatar.Image
                                 source={{
-                                    uri: profileImageSrc
+                                    uri: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=750&q=80"
                                 }}
+                                
                                 style={{ backgroundColor: '#00B7EC' }}
                                 size={50}
                             />
@@ -130,24 +118,24 @@ const MenuDrawer = ({ navigation, login_session, profile_session, general_sessio
                         />
                     </Drawer.Section>
                     <Drawer.Section title="Preferences">
-                        <TouchableRipple onPress={() => { }}>
+                        <TouchableOpacity onPress={() => { }}>
                             <View style={styles.preference}>
                                 <Text>Hide Name</Text>
                                 <View pointerEvents="none">
                                     <Switch value={false} />
                                 </View>
                             </View>
-                        </TouchableRipple>
+                        </TouchableOpacity>
                     </Drawer.Section>
                     <Drawer.Section>
-                        <TouchableRipple onPress={() => { }}>
+                        <TouchableOpacity onPress={() => { }}>
                             <View style={styles.preference}>
                                 <Text>Hide Wallet</Text>
                                 <View pointerEvents="none">
                                     <Switch value={false} />
                                 </View>
                             </View>
-                        </TouchableRipple>
+                        </TouchableOpacity>
                     </Drawer.Section>
                 </View>
             </DrawerContentScrollView>

@@ -186,6 +186,100 @@ const LightMode = {
             borderRadius: 4
         }
     }),
+
+    Modal: {
+        General: StyleSheet.create({
+            rootContainer: {
+                flex: 1,
+                padding: 0,
+                margin: 0,
+                borderWidth: 0,
+                width: width * (90 / 100),
+                height: height * (80 / 100),
+                marginLeft: "5%",
+                marginRight: "5%",
+                marginTop: "10%",
+                marginBottom: "10%",
+            }
+        }),
+
+        PopUp: StyleSheet.create({
+
+            contentContainer: {
+                flexDirection: 'column',
+                padding: 3,
+                width: '100%',
+                minHeight: '30%',
+                backgroundColor: LightTheme.COMPLIMENTARY2
+            },
+
+            header: {
+                flexDirection: "row",
+                width: "100%",
+                paddingBottom: "1%",
+                borderBottomWidth: 0.8,
+                borderColor: LightTheme.COMPLIMENTARY1
+            },
+
+            body: {
+                maxHeight: "85%",
+                minHeight: "40%",
+            },
+
+            headerChild1:{
+                width: '58%',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                padding: 2
+            },
+
+            headerChild2:{
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                width: '20%',
+                backgroundColor: LightTheme.PRIMARY,
+                padding: 2,
+                borderRadius: 5,
+                marginRight: "2%"
+            },
+
+            headerChild3:{
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                width: '20%',
+                backgroundColor: LightTheme.INFORMATIVE,
+                padding: 2,
+                borderRadius: 5
+            },
+
+            headerChild1Text:{
+                fontFamily: LightTheme.FONT1,
+                fontSize: LightTheme.EXTRASMALLFONTSIZE,
+                color: LightTheme.COMPLIMENTARY3
+            },
+            
+            headerChild2Text:{
+                fontFamily: LightTheme.FONT1,
+                fontSize: LightTheme.EXTRASMALLFONTSIZE,
+                color: LightTheme.COMPLIMENTARY2,
+                width: "100%",
+                textAlign: "center"
+            },
+
+            headerChild3Text:{
+                fontFamily: LightTheme.FONT1,
+                fontSize: LightTheme.EXTRASMALLFONTSIZE,
+                color: LightTheme.COMPLIMENTARY2,
+                width: "100%",
+                textAlign: "center"
+            }
+        }),
+
+        Alert: StyleSheet.create({
+
+        })
+    },
+
     HomeMatchBox: StyleSheet.create({
         container: {
             width: "100%",
@@ -604,8 +698,8 @@ const LightMode = {
     PopUpStyle: StyleSheet.create({
         container: {
             flex: 1,
-            width: '100%',
-            height: '100%',
+            width: width,
+            height: height,
             backgroundColor: LightTheme.COMPLIMENTARY3TRANSPARENT(94),
         },
         contentContainer: {
@@ -614,7 +708,7 @@ const LightMode = {
             margin: 0,
             borderWidth: 0,
             maxWidth: '90%',
-            maxHeight: '80%',
+            maxHeight: '90%',
         },
         content: {
             padding: 0,
@@ -1342,7 +1436,7 @@ const LightMode = {
             width: width,
             height: height,
             flexDirection: 'column',
-            backgroundColor: LightTheme.COMPLIMENTARY2,
+            backgroundColor: LightTheme.COMPLIMENTARY1,
         },
         header: {
             width: '100%',

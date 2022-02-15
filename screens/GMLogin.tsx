@@ -9,7 +9,6 @@ import {
   BackHandler
 } from 'react-native';
 import { LogoWTIcon } from '../components/logo';
-import StatusBar from '../components/Statusbar';
 import { UsernameInputBox, PasskeyInputBox } from '../components/FormItems';
 import { MainButton } from '../components/Button';
 import { MyAlert } from '../components/PopUp';
@@ -24,6 +23,7 @@ import { bindActionCreators } from 'redux';
 import { loginUser } from '../components/axios';
 import { APP_RESPONSE, REDUX_SESSION_LOCAL_STORE_KEYS } from '../constants/constants';
 import { isLoggedIn } from '../components/common';
+import StatusBar from '../components/Statusbar';
 const GMLogin = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
   const [data, setData] = useState<LoginParamStateType>({
     username: null,
@@ -250,7 +250,7 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
 
   return (
     <>
-    <StatusBar theme={Theme} />
+    <StatusBar/>
       <View style={Theme.GMLoginStyle.container}>
 
         <View style={Theme.GMLoginStyle.top}>

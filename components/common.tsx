@@ -19,7 +19,7 @@ export const getBearer = (): string => {
 
 export const storeLocally = async (session: ReduxSession, localStoreSettings: storeLocalyType): Promise<void> => {
   if (localStoreSettings.allow == true) {
-    //permission granted to store locally, which enable the app resume user settings and configurations on the device,
+    //permission granted to store locally, which enables the app resume user settings and configurations on the device,
     //default for this is set in the initial state of general_session in session part inside reducer's folder
 
     //check if data already exist locally so we know if to merge or add new data
@@ -213,6 +213,22 @@ export const getCountryByIndex = (index: number) => {
 
 }
 
+export const getCountryIndexByCountryCode = (CountryCode: string) => {
+
+  const Countries = getCountries();
+  const countryIndex = Countries.findIndex((country)=> country.code == CountryCode.toLowerCase());
+  return countryIndex;
+
+}
+
+export const getCountryStateIndexByCountryCodeandState= (CountryCode: string, CountryState: string) => {
+
+  const CountryStates = myCountryStatelist(CountryCode.toLowerCase());
+  const CountryStateIndex = CountryStates.findIndex((countryStateValue : string)=> countryStateValue.startsWith(CountryState));
+  return CountryStateIndex;
+
+}
+
 export const getMyCountryCodeName = (countryName: string) => {
   const countryCode = getCountry(countryName).code;
   return countryCode;
@@ -239,11 +255,6 @@ export const getAge = (DOB: Date) => {
   return age;
 }
 
-export const getFileBase64FromURL = (uri: string, yourCallBack: (base64String: string | null) => void) => {
-  axios.get(uri, { responseType: 'arraybuffer' })
-    .then(res => yourCallBack(res.request._response))
-    .catch(error => yourCallBack(null));
-};
 
 export const SvgImager = ({ url }: { url: string }) => (
   <SvgUri

@@ -6,7 +6,7 @@ import ModalDropdown from 'react-native-modal-dropdown';
 import { myCountryList, myCountryStatelist } from "./common";
 
 
-const AccountListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }: ListDropDownParamType) => {
+const AccountListDropDown = ({ theme, defaultIndex = 4, language, yourCallBack }: ListDropDownParamType) => {
   const [value, setValue] = useState(language.GENERAL.ACCOUNT_LIST[defaultIndex])
   useEffect(() => {
     setValue(language.GENERAL.ACCOUNT_LIST[defaultIndex]);
@@ -27,10 +27,7 @@ const AccountListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }
         textStyle={theme.CountryPickerStyle.PickerBox.TextStyle}
         dropdownStyle={value != language.GENERAL.ACCOUNT_LIST[4] ? theme.CountryPickerStyle.PickerBox.DropdownStyle1 : theme.CountryPickerStyle.PickerBox.DropdownStyle2}
         dropdownTextStyle={theme.CountryPickerStyle.PickerBox.DropdownTextStyle}
-        onSelect={(index, option) => {
-          yourCallBack(index)
-        }
-        }
+        onSelect={ (index, option) => yourCallBack(index) }
 
         options={language.GENERAL.ACCOUNT_LIST}
       />
@@ -69,7 +66,7 @@ const AccountListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }
 }
 
 
-const GenderListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }: ListDropDownParamType) => {
+const GenderListDropDown = ({ theme, defaultIndex = 3, language, yourCallBack }: ListDropDownParamType) => {
   const [value, setValue] = useState(language.GENERAL.GENDER_LIST[defaultIndex])
   useEffect(() => {
     setValue(language.GENERAL.GENDER_LIST[defaultIndex]);
@@ -121,7 +118,7 @@ const GenderListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }:
 
 }
 
-const AgeListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }: ListDropDownParamType) => {
+const AgeListDropDown = ({ theme, defaultIndex = 7, language, yourCallBack }: ListDropDownParamType) => {
   const [value, setValue] = useState(language.GENERAL.AGERANGE_LIST[defaultIndex])
   useEffect(() => {
     setValue(language.GENERAL.AGERANGE_LIST[defaultIndex]);
@@ -150,7 +147,7 @@ const AgeListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }: Li
 }
 
 
-const GenotypeListDropDown = ({ theme, defaultIndex = 0, language, yourCallBack }: ListDropDownParamType) => {
+const GenotypeListDropDown = ({ theme, defaultIndex = 7, language, yourCallBack }: ListDropDownParamType) => {
   const [value, setValue] = useState(language.GENERAL.GENOTYPE_LIST[defaultIndex])
   useEffect(() => {
     setValue(language.GENERAL.GENOTYPE_LIST[defaultIndex]);
@@ -211,7 +208,7 @@ const CountryListDropDown = ({ theme, defaultIndex = 0, yourCallBack }: ListDrop
 
 
 const CountryStateListDropDown = ({ theme, countryCode = 'dz', defaultIndex = 0, yourCallBack }: StateListDropDownParamType) => {
-  const [value, setValue] = useState(myCountryStatelist(countryCode)[defaultIndex])
+  const [value] = useState(myCountryStatelist(countryCode)[defaultIndex])
   const [countryState, setCountryState] = useState(myCountryStatelist(countryCode))
   useEffect(() => {
     setCountryState(myCountryStatelist(countryCode))

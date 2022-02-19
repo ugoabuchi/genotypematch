@@ -32,6 +32,7 @@ import { SubButton } from '../components/Button';
 import { PermissionStatus } from 'expo-location';
 import StatusBar from '../components/Statusbar';
 import { ModalPopUpBox } from '../components/Modal';
+import {APP_RESPONSE} from '../constants/constants';
 
 const GMHome = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
 
@@ -80,6 +81,14 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
   const [countryDefaultIndex, setCountryDefaultIndex] = useState<number>(0);
 
   const [countryStateDefaultIndex, setCountryStateDefaultIndex] = useState<number>(0);
+
+  const [accountDefaultIndex, setAccountDefaultIndex] = useState<number>(4);
+
+  const [genderDefaultIndex, setGenderDefaultIndex] = useState<number>(3);
+
+  const [agerangeDefaultIndex, setAgerangeDefaultIndex] = useState<number>(7);
+
+  const [genotypeDefaultIndex, setGenotypeDefaultIndex] = useState<number>(7);
 
   const [modalFilterTitle, setModalFilterTitle] = useState<string>(null);
 
@@ -178,7 +187,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     }
     else if(accounttype == ACCOUNT_TYPES.PREMIUM)
     {
-      if(genotypeIndex != 7 || accoountIndex != 4)
+      if(genotypeIndex != genotypeDefaultIndex || accoountIndex != accountDefaultIndex)
       {
         return {
           value: false,
@@ -194,7 +203,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     }
     else
     {
-      if(countryIndex != countryDefaultIndex || stateIndex != countryStateDefaultIndex || genderIndex != 3 || genotypeIndex != 7 || accoountIndex != 4 || agerangeIndex != 7)
+      if(countryIndex != countryDefaultIndex || stateIndex != countryStateDefaultIndex || genderIndex != genderDefaultIndex || genotypeIndex != genderDefaultIndex || accoountIndex != accountDefaultIndex || agerangeIndex != agerangeDefaultIndex)
       {
         return {
           value: false,
@@ -220,7 +229,6 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     }
 
    //check filter
-
    const filteredValue = filterAccepted();
    if(filteredValue.value != true){
 
@@ -249,6 +257,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
    }
 
    setCard([]);
+   setIsLoading(false);
 
    }
    else
@@ -300,33 +309,160 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         setStateIndex(countryStateIndexValue);
         setCountryDefaultIndex(countryIndexValue);
         setCountryStateDefaultIndex(countryStateIndexValue)
+
+        const {accounttype} = profile_session.profile_session;
+          //set to all for VIP DEFAULT
+          if(accounttype == ACCOUNT_TYPES.VIP)
+          {
+            setAccountIndex(0);
+            setGenderIndex(0);
+            setGenotypeIndex(0);
+            setAgerangeIndex(0);
+            setAccountDefaultIndex(0);
+            setGenderDefaultIndex(0);
+            setGenotypeDefaultIndex(0);
+            setAgerangeDefaultIndex(0);
+
+        const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token',profile_session.profile_session.token);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        params.append('country', reverseCoords.CountryCode);
+        params.append('city', reverseCoords.region);
+        params.append('account',0+"");
+        params.append('gender',0+"");
+        params.append('bloodgroup',0+"");
+        params.append('agerange',0+"");
+        params.append('reqcountry', getMyCountryCodeName(myCountryList()[countryIndexValue]));
+        params.append('reqcity',(myCountryStatelist(getMyCountryCodeName(myCountryList()[countryIndexValue])))[countryStateIndexValue]);
+        params.append('limit',MATCH_REQUEST_LIMIT+"");
+        params.append('offset',requestOffset+"");
+        
+         const APP_REQUEST_API = await getMatchResults(params, Lang);
+          if(APP_REQUEST_API.response == APP_RESPONSE.MATCHES.SUCCESS)
+          {
+            setCard(APP_REQUEST_API.data);
+          }
+          else
+          {
+            const error = APP_REQUEST_API.response;
+            setCard([]);
+          }
+
+
+          }
+          else if(accounttype == ACCOUNT_TYPES.PREMIUM)
+          {
+            setGenderIndex(0);
+            setAgerangeIndex(0);
+            setGenderDefaultIndex(0);
+            setAgerangeDefaultIndex(0);
+
+            const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token',profile_session.profile_session.token);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        params.append('country', reverseCoords.CountryCode);
+        params.append('city', reverseCoords.region);
+        params.append('account',accoountIndex+"");
+        params.append('gender',0+"");
+        params.append('bloodgroup',genotypeIndex+"");
+        params.append('agerange',0+"");
+        params.append('reqcountry', getMyCountryCodeName(myCountryList()[countryIndexValue]));
+        params.append('reqcity',(myCountryStatelist(getMyCountryCodeName(myCountryList()[countryIndexValue])))[countryStateIndexValue]);
+        params.append('limit',MATCH_REQUEST_LIMIT+"");
+        params.append('offset',requestOffset+"");
+        
+        const APP_REQUEST_API = await getMatchResults(params, Lang);
+  
+        if(APP_REQUEST_API.response == APP_RESPONSE.MATCHES.SUCCESS)
+        {
+          setCard(APP_REQUEST_API.data);
+        }
+        else
+        {
+          const error = APP_REQUEST_API.response;
+          setCard([]);
+        }
+
+
+          }
+          else 
+          {
+
+            const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token',profile_session.profile_session.token);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        params.append('country', reverseCoords.CountryCode);
+        params.append('city', reverseCoords.region);
+        params.append('account',accoountIndex+"");
+        params.append('gender',genderIndex+"");
+        params.append('bloodgroup',genotypeIndex+"");
+        params.append('agerange',agerangeIndex+"");
+        params.append('reqcountry', getMyCountryCodeName(myCountryList()[countryIndexValue]));
+        params.append('reqcity',(myCountryStatelist(getMyCountryCodeName(myCountryList()[countryIndexValue])))[countryStateIndexValue]);
+        params.append('limit',MATCH_REQUEST_LIMIT+"");
+        params.append('offset',requestOffset+"");
+        
+        const APP_REQUEST_API = await getMatchResults(params, Lang);
+  
+        if(APP_REQUEST_API.response == APP_RESPONSE.MATCHES.SUCCESS)
+        {
+          setCard(APP_REQUEST_API.data);
+        }
+        else
+        {
+          const error = APP_REQUEST_API.response;
+          setCard([]);
+        }
+
+
+          }
+          
+
+        
+          
+          setIsLoading(false);
+          
+      }
+      else
+      {
+
+        const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token',profile_session.profile_session.token);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        params.append('country', reverseCoords.CountryCode);
+        params.append('city', reverseCoords.region);
+        params.append('account',accoountIndex+"");
+        params.append('gender',genderIndex+"");
+        params.append('bloodgroup',genotypeIndex+"");
+        params.append('agerange',agerangeIndex+"");
+        params.append('reqcountry', getMyCountryCodeName(myCountryList()[countryIndex]));
+        params.append('reqcity',(myCountryStatelist(getMyCountryCodeName(myCountryList()[countryIndex])))[stateIndex]);
+        params.append('limit',MATCH_REQUEST_LIMIT+"");
+        params.append('offset',requestOffset+"");
+        
+        const APP_REQUEST_API = await getMatchResults(params, Lang);
+  
+        if(APP_REQUEST_API.response == APP_RESPONSE.MATCHES.SUCCESS)
+        {
+          setCard(APP_REQUEST_API.data);
+        }
+        else
+        {
+          const error = APP_REQUEST_API.response;
+          setCard([]);
+        }
+          setIsLoading(false);
+          
       }
 
-      const params = new URLSearchParams();
-      params.append('userid', profile_session.profile_session.username);
-      params.append('token',profile_session.profile_session.token);
-      params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
-      params.append('country', reverseCoords.CountryCode);
-      params.append('city', reverseCoords.region);
-      params.append('account',accoountIndex+"");
-      params.append('gender',genderIndex+"");
-      params.append('bloodgroup',genotypeIndex+"");
-      params.append('agerange',agerangeIndex+"");
-      params.append('reqcountry', getMyCountryCodeName(myCountryList()[countryIndex]));
-      params.append('reqcity',(myCountryStatelist(getMyCountryCodeName(myCountryList()[countryIndex])))[stateIndex]);
-      params.append('limit',MATCH_REQUEST_LIMIT+"");
-      params.append('offset',requestOffset+"");
-      
-      //const APP_REQUEST_API = await getMatchResults(params, Lang);
-      
 
-        setCard([
-          {key: 0, id: "0", name: "Mathew Fortune", gender: "Male", lastseencountry: "NG", lastseencity: "Lagos", lastseencoords: "8.5894BLARK6.9758", distance: "400", dob: "1985-12-09", description: "We getting the ball rolling", blooggroup: "CC", accounttype: "Basic", url: "test.png", pverified: "true", bverified:"true", online: "true"},
-          {key: 1, id: "1", name: "Angela Jones", gender: "Female", lastseencountry: "US", lastseencity: "Ohio", lastseencoords: "8.5894BLARK6.9758", distance: "400", dob: "1985-12-09", description: "We getting the ball rolling", blooggroup: "CC", accounttype: "Basic", url: "test1.png", pverified: "true", bverified:"false", online: "false"},
-          {key: 2, id: "2", name: "Divine Adaugo", gender: "Male", lastseencountry: "GH", lastseencity: "Kumasi", lastseencoords: "8.5894BLARK6.9758", distance: "10", dob: "1980-09-10", description: "Gotch you right there, serios people only", blooggroup: "AA", accounttype: "VIP", url: "test.png", pverified: "true", bverified:"true", online: "true"},
-          {key: 3, id: "3", name: "Kingsely Pius", gender: "Male", lastseencountry: "NG", lastseencity: "Lagos", lastseencoords: "8.5894BLARK6.9758", distance: "20", dob: "1999-02-01", description: "bla bla bla bla bla bla bla bla", blooggroup: "SS", accounttype: "Basic", url: "test1.png", pverified: "true", bverified:"false", online: "false"},
-          
-        ]);
+     
+
+      
         
       }
 
@@ -351,21 +487,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
       })
 
       setCard([]);
+      setIsLoading(false);
       }
-    //empty card should be repreented with [] and not null, so that the background location checker would not mess with data fetching
-    //set default to empty card
-    //setCard([]);
-    
-
-    //fetch card
-    /*setCard([
-      { key: 0, id: 0, name: "Mathew Fortune", gender: "Male", locationcode: "105.112.154.62blarkNigeriablarkNGblarkhttps:\/\/cdn.ipwhois.io\/flags\/ng.svgblarkLagosblark6.5243793blark3.3792057", distance: "20", dob: "1996-26-12", description: "Just a disction about me", blooggroup: "AS", accounttype: "Premium", url: "xxx.jpg", pverified: "true", bverified: "true", isOnline: "true" },
-      { key: 1, id: 1, name: "Angela Jones", gender: "Female", locationcode: "105.112.154.62blarkUSAblarkUSblarkhttps:\/\/cdn.ipwhois.io\/flags\/us.svgblarkDenverblark6.5243793blark3.3792057", distance: "400", dob: "1985-12-09", description: "We getting the ball rolling", blooggroup: "CC", accounttype: "Basic", url: "test.png", pverified: "true", bverified: "false", isOnline: "false" },
-      { key: 2, id: 2, name: "Divine Adaugo", gender: "Male", locationcode: "105.112.154.62blarkCanadablarkCAblarkhttps:\/\/cdn.ipwhois.io\/flags\/ca.svgblarkTorontoblark6.5243793blark3.3792057", distance: "10", dob: "1980-09-10", description: "Gotch you right there, serios people only", blooggroup: "AA", accounttype: "VIP", url: "test1.png", pverified: "true", bverified: "true", isOnline: "true" },
-      { key: 3, id: 3, name: "Kingsely Pius", gender: "Male", locationcode: "105.112.154.62blarkGhanablarkGHblarkhttps:\/\/cdn.ipwhois.io\/flags\/gh.svgblarkAccrablark6.5243793blark3.3792057", distance: "20", dob: "1999-02-01", description: "bla bla bla bla bla bla bla bla", blooggroup: "SS", accounttype: "Basic", url: "test.png", pverified: "true", bverified: "false", isOnline: "false" },
-
-    ]);
-    */
+  
     
     
 
@@ -374,7 +498,9 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
    {
 
     //update location states params
+    
     rquestLocationPermission_sub();
+    setIsLoading(false);
     
    }
 
@@ -384,7 +510,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
 
    
-   setIsLoading(false);
+
     
    
 

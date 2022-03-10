@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -33,11 +33,12 @@ const Session = ({ navigation, route, login_session, profile_session, general_se
   const Theme = general_session.general_session.theme_mode;
   const Lang = general_session.general_session.Language;
 
+  const backHandlerListener = useRef<any>();
 
   useEffect(() => {
 
     //BackHandlerCallBack
-    BackHandler.addEventListener("hardwareBackPress", () => {
+  backHandlerListener.current = BackHandler.addEventListener("hardwareBackPress", () => {
       setAlertBox({
         ...alertBox,
         alertType: "warning",
@@ -53,13 +54,16 @@ const Session = ({ navigation, route, login_session, profile_session, general_se
     })
 
 
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", backHandlerListener.current);
+    };
+
   }, [])
 
   isLoggedIn({
     login_session: login_session,
     mandate: true,
     yourCallBack: () => {
-      BackHandler.removeEventListener('hardwareBackPress', () => true);
       navigation.replace('Main', {
         screen: 'AfterLogin',
         params: {
@@ -75,7 +79,6 @@ const Session = ({ navigation, route, login_session, profile_session, general_se
 
 
   const onMainBTNAction = () => {
-    BackHandler.removeEventListener('hardwareBackPress', () => true);
     navigation.replace("GMLogin");
   }
 

@@ -14,6 +14,7 @@ const ENGLISH = {
     ENABLE_LOCATION_SERVICES: "Enable location services",
     LOCATION_BLOCKED_OR_UNAVAILABLE_FIX_ERROR_TEXT: "Grant location permission",
     LOCATION_COORDS_NOT_FOUND: "Couldn't fectch your\nlocation coordinates",
+    LOCATION_COORDS_NOT_FOUND_ON_YUP: "Couldn't perform YUP\nlocation coordinates not found",
     DEFAULT_INPUTBOX_PLACEHOLDER: "Enter value here",
     DEFAULT_TOAST_TEXT: "Toast message...",
     BEFORE_EXIT_TOAST_TEXT: "Press back again to exit",
@@ -63,7 +64,8 @@ const ENGLISH = {
     YRS: "yrs",
     NAME: "Name",
     LOCATION: "Location",
-    LOCATION_DETAILS_UNDEFINED: "Location details undefined\ncheck your network connection",
+    LOCATION_DETAILS_UNDEFINED: "Location details undefined",
+    PUSHNOTIFICATIONTOKENERROR: "Failed to get push token",
     VIPUPGRADE: "Your filter options\nrequires VIP",
     ACCOUNTUPGRADE: "Your filter options\nrequire VIP or PREMIUM",
     ABOUT: "About",
@@ -122,6 +124,11 @@ const ENGLISH = {
         SUCCESS: "Match result available",
         INVALIDPARAMS: "Invalid request, browse the app properly",
         INVALIDACCOUNTTYPE: "Invalid account type,\nuse the app properly"
+      },
+      YUP: {
+        SUCCESS: "Yup success",
+        ALREADYLIKED: "You already Yupped\nthis user",
+        INVALIDMATCHUSER: "User to be matched\nis invalid"
       },
 
     },

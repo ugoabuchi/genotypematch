@@ -1,4 +1,5 @@
-import React, { useEffect, useState} from 'react';
+import * as Notifications from 'expo-notifications';
+import React, { useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -21,7 +22,7 @@ import { Badge } from 'react-native-paper';
 import { getAge, getCountryByIndex, getCountryIndexByCountryCode, getCountryStateIndexByCountryCodeandState, getMyCountryCodeName, isLoggedIn, myCountryList, myCountryStatelist, SvgImager } from '../components/common';
 import { MyAlert } from '../components/PopUp';
 import { AccountListDropDown, AgeListDropDown, CountryListDropDown, CountryStateListDropDown, GenderListDropDown, GenotypeListDropDown } from '../components/ListDropDown';
-import { getMatchResults } from '../components/axios';
+import { getMatchResults, sendYUP } from '../components/axios';
 import { AlertBoxStateParamType, MatchFilterType, NavPropsType, ModalStateType, MatchesCardType, mCard, CardType, buttonParamType } from '../types';
 import { BloodBagIcon, FemaleGenderIcon, FilterIcon, GiftIcon, MaleGenderIcon, MenuIcon, NopeIcon, PREMIUMDisplayIcon, VerifiedUser100Icon, VIPDisplayIcon, YupIcon, BASICDisplayIcon, VerifiedUser50Icon, VerifiedUser10Icon, LoadIndicator, PrimaryLoadingIndicator, LocationIcon } from '../components/Icon';
 import { PulseViewAnimation } from '../components/Animations';
@@ -34,12 +35,26 @@ import StatusBar from '../components/Statusbar';
 import { ModalPopUpBox } from '../components/Modal';
 import {APP_RESPONSE} from '../constants/constants';
 
+
+    //Setting notification handler
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+
 const GMHome = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
 
   const Theme = general_session.general_session.theme_mode;
   const Lang = general_session.general_session.Language;
 
-  //set useref for allocated background intervals
+  //set notification state variables
+  const [notification, setNotification] = useState<any>(false);
+  const backHandlerListener = useRef<any>();
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
 
   const [alertBox, setAlertBox] = useState<AlertBoxStateParamType>({
     alertType: "normal",
@@ -128,7 +143,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
   useEffect(() => {
     //BackHandlerCallBack
-    BackHandler.addEventListener("hardwareBackPress", () => {
+   backHandlerListener.current = BackHandler.addEventListener("hardwareBackPress", () => {
       setAlertBox({
         ...alertBox,
         alertType: "warning",
@@ -144,11 +159,26 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
       return true;
     });
 
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
 
 
 
     //update permission state
     getGeoLocationPermission_sub()
+
+
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", backHandlerListener.current);
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
 
   }, [])
 
@@ -158,6 +188,8 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
       loadMatches(true);
     }
   }, [isLocation])
+
+ 
 
   isLoggedIn({
     login_session: login_session,
@@ -293,8 +325,12 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
           })
 
         }
-
-          setCard([]);
+        
+        setisLocation({
+          ...isLocation,
+          enabled: PermissionStatus.DENIED,
+          message: Lang.GENERAL.LOCATION_DETAILS_UNDEFINED
+        });
           setIsLoading(false);
       }
       else
@@ -474,20 +510,29 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
       {
 
 
-      
-      setAlertBox({
-        ...alertBox,
-        alertType: "warning",
-        title: null,
-        message: Lang.GENERAL.LOCATION_COORDS_NOT_FOUND,
-        cancelText: Lang.GENERAL.OK,
-        showConfirm: false,
-        showAlert: true,
-        cancelAction: () => cancelAlert(),
-      })
+        if(firstmount == false)
+        {
 
-      setCard([]);
-      setIsLoading(false);
+          setAlertBox({
+            ...alertBox,
+            alertType: "warning",
+            title: null,
+            message: Lang.GENERAL.LOCATION_COORDS_NOT_FOUND,
+            cancelText: Lang.GENERAL.OK,
+            showConfirm: false,
+            showAlert: true,
+            cancelAction: () => cancelAlert(),
+          })
+          
+        }
+
+        setisLocation({
+          ...isLocation,
+          enabled: PermissionStatus.DENIED,
+          message: Lang.GENERAL.LOCATION_COORDS_NOT_FOUND
+        });
+
+        setIsLoading(false);
       }
   
     
@@ -645,6 +690,7 @@ const handleOpenSettings = () => {
 
   const handleYup = (currentCard: MatchesCardType) => {
 
+    YUPRequester(currentCard.id);
     return true;
 
   }
@@ -672,6 +718,22 @@ const handleOpenSettings = () => {
 
   const giftAction = () => {
     swiper.swipeMaybe();
+  }
+
+
+  const YUPRequester = async (matchuserdbID: string) : Promise<void> => {
+
+    const coords = await getGeoCoords();
+      if(coords)
+      {
+        const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token', profile_session.profile_session.token);
+        params.append('matchuserdbID', matchuserdbID);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        await sendYUP(params, Lang);
+      }
+
   }
 
   const NopeSwipeDesign = () => {

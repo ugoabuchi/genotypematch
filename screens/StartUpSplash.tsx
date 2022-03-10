@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text
@@ -25,6 +25,8 @@ const StartUpSplash = ({ navigation, route, login_session, profile_session, gene
   const Theme = general_session.general_session.theme_mode;
   const Lang = general_session.general_session.Language;
 
+  const backHandlerListener = useRef<any>();
+  const timerHandlerListener = useRef<any>();
 
   StartUpHeaderConfiguration({
     login_session: login_session,
@@ -37,6 +39,8 @@ const StartUpSplash = ({ navigation, route, login_session, profile_session, gene
       //noaction
     },
     setTimer: SPLASH_SCREEN_TIMEOUT,
+    backHandlerRef: backHandlerListener,
+    timerHandlerRef: timerHandlerListener,
     yourCallBack: () => {
       setShouldLogIn(true);
     }
@@ -46,12 +50,12 @@ const StartUpSplash = ({ navigation, route, login_session, profile_session, gene
     login_session: login_session,
     mandate: true,
     yourCallBack: () => {
-      setTimeout(() => {
+      timerHandlerListener.current = setTimeout(() => {
 
         navigation.replace('Main', {
           screen: 'AfterLogin'
         })
-        clearTimeout();
+
       }, SPLASH_SCREEN_TIMEOUT * 1000)
 
     }
@@ -59,9 +63,8 @@ const StartUpSplash = ({ navigation, route, login_session, profile_session, gene
 
   useEffect(() => {
     if (shouldLogIn == true && login_session.login_session == false) {
-      setTimeout(() => {
+      timerHandlerListener.current = setTimeout(() => {
         navigation.replace('Session');
-        clearTimeout();
       }, SPLASH_SCREEN_TIMEOUT * 1000);
     }
   }, [shouldLogIn])

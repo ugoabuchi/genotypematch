@@ -63,6 +63,11 @@ export const API_RESPONSE = {
     INVALIDPARAMS: "error-invalid-request-params",
     INVALIDACCOUNTTYPE: "invalid-account-selection-type"
   },
+  YUP: {
+    SUCCESS: true,
+    ALREADYLIKED: "already-liked",
+    INVALIDMATCHUSER: "invalid-match-user"
+  },
 }
 
 export const APP_RESPONSE = {
@@ -94,6 +99,11 @@ export const APP_RESPONSE = {
     SUCCESS: "match-found",
     INVALIDPARAMS: "invalid-request-params",
     INVALIDACCOUNTTYPE: "account-selection-type-error"
+  },
+  YUP: {
+    SUCCESS: "yup-success",
+    ALREADYLIKED: "yup-exist",
+    INVALIDMATCHUSER: "match-user-invalid"
   },
 }
 

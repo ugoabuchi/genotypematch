@@ -166,7 +166,7 @@ const getUsernameExist = async (params: URLSearchParams, language: any, useCase:
 
 const getMatchResults = async (params: URLSearchParams, language: any): Promise<APIResponse> => {
   
-  params.append('action', 'updatematches');
+  params.append('action', 'updateMatches');
   
   try {
     const user = await axios.post(ReQUEST_URL, params, AXIOS_HEADER_CONFIG);
@@ -191,6 +191,87 @@ const getMatchResults = async (params: URLSearchParams, language: any): Promise<
             return {
               response: APP_RESPONSE.MATCHES.INVALIDPARAMS,
               message: language.GENERAL.RESPONSE.MATCHES.INVALIDPARAMS
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.USERNAMEREGEXFALSE)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.USERNAMEREGEXFALSE,
+              message: language.GENERAL.RESPONSE.GENERAL.USERNAMEREGEXFALSE
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.TOKENFALSE)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.TOKENFALSE,
+              message: language.GENERAL.RESPONSE.GENERAL.TOKENFALSE
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.INSECURENETWORK)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.INSECURENETWORK,
+              message: language.GENERAL.RESPONSE.GENERAL.INSECURENETWORK
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.USERNAMEORACTIONNULL)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.USERNAMEORACTIONNULL,
+              message: language.GENERAL.RESPONSE.GENERAL.USERNAMEORACTIONNULL
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.ACTIONFALSE)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.ACTIONFALSE,
+              message: language.GENERAL.RESPONSE.GENERAL.ACTIONFALSE
+            };
+          }
+          else
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.SERVER,
+              message: language.GENERAL.RESPONSE.GENERAL.SERVER
+            }
+          }
+      
+    
+    
+  } catch (error: any) {
+    return {
+      response: APP_RESPONSE.GENERAL.NONETWORK,
+      message: language.GENERAL.RESPONSE.GENERAL.NONETWORK
+    };
+  }
+};
+
+const sendYUP = async (params: URLSearchParams, language: any): Promise<APIResponse> => {
+  
+  params.append('action', 'performYUP');
+  
+  try {
+    const user = await axios.post(ReQUEST_URL, params, AXIOS_HEADER_CONFIG);
+    const userData: ServerResponse = user.data;
+          if(userData.response == API_RESPONSE.YUP.SUCCESS)
+          {
+            return {
+              response: APP_RESPONSE.YUP.SUCCESS,
+              message: language.GENERAL.RESPONSE.YUP.SUCCESS
+            };
+          }
+          else if(userData.response == API_RESPONSE.YUP.ALREADYLIKED)
+          {
+            return {
+              response: APP_RESPONSE.YUP.ALREADYLIKED,
+              message: language.GENERAL.RESPONSE.YUP.ALREADYLIKED
+            };
+          }
+          else if(userData.response == API_RESPONSE.YUP.INVALIDMATCHUSER)
+          {
+            return {
+              response: APP_RESPONSE.YUP.INVALIDMATCHUSER,
+              message: language.GENERAL.RESPONSE.YUP.INVALIDMATCHUSER
             };
           }
           else if(userData.response == API_RESPONSE.GENERAL.USERNAMEREGEXFALSE)
@@ -372,6 +453,7 @@ export {
   getMatchResults,
   addUser,
   getMatches,
+  sendYUP,
   verifyAccount,
   checkEmailNotVerified,
   sendEmailVerificationMail,

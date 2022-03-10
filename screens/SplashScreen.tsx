@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   BackHandler,
   View
@@ -10,21 +10,27 @@ import { SPLASH_SCREEN_TIMEOUT } from '../constants/constants';
 import StatusBar from '../components/Statusbar';
 
 const SplashScreen = ({ navigation, general_session }: NavPropsType) => {
+
+  const backHandlerListener = useRef<any>();
+  const timerHandlerListener = useRef<any>();
+
   useEffect(() => {
 
 
 
-    BackHandler.addEventListener("hardwareBackPress", () => {
+    backHandlerListener.current = BackHandler.addEventListener("hardwareBackPress", () => {
       //no action
       return true;
     });
 
-    setTimeout(() => {
-      BackHandler.removeEventListener('hardwareBackPress', () => true);
+   timerHandlerListener.current = setTimeout(() => {
       navigation.replace('StartUpSplash');
-      clearTimeout();
     }, SPLASH_SCREEN_TIMEOUT * 1000)
 
+    return () => {
+      clearTimeout(timerHandlerListener.current);
+      BackHandler.removeEventListener('hardwareBackPress', backHandlerListener.current);
+    };
   }, [])
 
 

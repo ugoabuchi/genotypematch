@@ -25,18 +25,7 @@ const initialStateofGeneral =  {
         bearer: getBearer(),
         settings: {
             statusBar: false,
-            fingerprint: false,
-            notification: {
-                background: true,
-                style : "slide",
-                messages: true,
-                likes: true,
-                gifts: true,
-                profile: true,
-                upgrades: true,
-                payments: true,
-                general: true,
-            }
+            fingerprint: false
         }
     }
 }

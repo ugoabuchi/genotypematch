@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import * as Notifications from 'expo-notifications';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -24,7 +25,17 @@ import { loginUser } from '../components/axios';
 import { APP_RESPONSE, REDUX_SESSION_LOCAL_STORE_KEYS } from '../constants/constants';
 import { isLoggedIn } from '../components/common';
 import StatusBar from '../components/Statusbar';
+
+
+
+
 const GMLogin = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
+  
+  //create notification pushtoken states
+  const backHandlerListener = useRef<any>();
+  
+
+  //set other states  
   const [data, setData] = useState<LoginParamStateType>({
     username: null,
     password: null,
@@ -51,15 +62,15 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
   useEffect(() => {
 
     //First time quering for back handler
-    BackHandler.addEventListener("hardwareBackPress", () => {
+    backHandlerListener.current =  BackHandler.addEventListener("hardwareBackPress", () => {
       BackHandler.removeEventListener('hardwareBackPress', () => true);
       navigation.navigate("Session");
       return true;
     });
 
-
-    //Other function may come in here
-
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backHandlerListener.current);
+    };
 
   }, [])
 
@@ -67,7 +78,7 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
     login_session: login_session,
     mandate: true,
     yourCallBack: () => {
-      BackHandler.removeEventListener('hardwareBackPress', () => true);
+      BackHandler.removeEventListener('hardwareBackPress', backHandlerListener.current);
       navigation.navigate('Main', {
         screen: 'AfterLogin'
       });
@@ -105,8 +116,213 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
       showAlert: false
     });
 
-    //check 1 - null entries
+    try{
+        //reload exponent push notificatoin token and on the server end must be request on every login which should always be updated in the backend
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+  if (existingStatus !== 'granted') {
+
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+
+  }
+  else if (finalStatus !== 'granted') {
+
+    setData({
+      ...data,
+      editable: true
+    })
+    //disable signin button
+    setSignButton({
+      ...singinButton,
+      showLoader: false
+    });
+    setAlertBox({
+      ...alertBox,
+      alertType: 'error',
+      cancelAction: () => cancelAlert(),
+      message: Lang.GENERAL.PUSHNOTIFICATIONTOKENERROR,
+      showConfirm: false,
+      showAlert: true
+    })
+
+  }
+  else
+  {
+
+    const exponentpushnotificationtoken = (await Notifications.getExpoPushTokenAsync()).data;
+
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+    
+    //Lets perform login operation  now
     if (data.username != null && data.password != null) {
+      //lock entry fields
+      setData({
+        ...data,
+        editable: false
+      })
+      //disable signin button
+      setSignButton({
+        ...singinButton,
+        showLoader: true
+      });
+
+      //send to API Server
+      const params = new URLSearchParams();
+      params.append('userid', data.username);
+      params.append('password', data.password);
+      params.append('PNID', exponentpushnotificationtoken);
+      const APP_REQUEST_API = await loginUser(params, Lang);
+
+      if (APP_REQUEST_API.response == APP_RESPONSE.LOGIN.SUCCESS) {
+        //update user general configs
+        if (general_session.general_session.FirstTimeAppLogin == true) {
+          general_session_action(
+            {
+              ...general_session.general_session,
+              FirstTimeAppLogin: false,
+              prevLoginUser: (APP_REQUEST_API.data.name).split(" ")[1]
+            },
+            {
+              allow: general_session.general_session.storeLocalData,
+              key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+            }
+          );
+        }
+        else {
+          general_session_action(
+            {
+              ...general_session.general_session,
+              prevLoginUser: (APP_REQUEST_API.data.name).split(" ")[1]
+            },
+            {
+              allow: general_session.general_session.storeLocalData,
+              key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+            }
+          );
+        }
+
+
+
+        //update profile state
+        profile_session_action(
+          APP_REQUEST_API.data,
+          {
+            allow: general_session.general_session.storeLocalData,
+            key: REDUX_SESSION_LOCAL_STORE_KEYS.profile_session
+          }
+        );
+
+        //unlock entry fields
+        setData({
+          ...data,
+          editable: true
+        })
+        //disable signin button
+        setSignButton({
+          ...singinButton,
+          showLoader: false
+        });
+
+        //Inapp user logged-in mode
+        login_session_action(
+          true,
+          {
+            allow: general_session.general_session.storeLocalData,
+            key: REDUX_SESSION_LOCAL_STORE_KEYS.login_session
+          }
+        )
+
+        //unlock entry fields
+        setData({
+          ...data,
+          editable: true
+        })
+        //disable signin button
+        setSignButton({
+          ...singinButton,
+          showLoader: false
+        });
+      }
+      else {
+        //couldn't login
+        //unlock entry fields
+        setData({
+          ...data,
+          editable: true
+        })
+        //disable signin button
+        setSignButton({
+          ...singinButton,
+          showLoader: false
+        });
+
+        setAlertBox({
+          ...alertBox,
+          alertType: 'error',
+          confirmText: Lang.GENERAL.ALERT_RETRY_TEXT,
+          confirmAction: () => retryLogin(),
+          cancelAction: () => cancelAlert(),
+          message: APP_REQUEST_API.message,
+          showConfirm: true,
+          showAlert: true
+        })
+
+      }
+
+
+    }
+    else {
+      setAlertBox({
+        ...alertBox,
+        alertType: 'error',
+        showConfirm: false,
+        cancelAction: () => cancelAlert(),
+        message: Lang.GENERAL.EMPTY_FORM_FIELD_DETECTED,
+        showAlert: true
+      })
+    }
+
+    
+  }
+    }
+    catch(err){
+      
+
+      setData({
+        ...data,
+        editable: true
+      })
+      //disable signin button
+      setSignButton({
+        ...singinButton,
+        showLoader: false
+      });
+      setAlertBox({
+        ...alertBox,
+        alertType: 'error',
+        cancelAction: () => cancelAlert(),
+        message: Lang.GENERAL.PUSHNOTIFICATIONTOKENERROR,
+        showConfirm: false,
+        showAlert: true
+      })
+
+
+    }
+
+    
+
+  
+
+    //check 1 - null entries
+   /* if (data.username != null && data.password != null) {
       //lock entry fields
       setData({
         ...data,
@@ -232,6 +448,8 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
         showAlert: true
       })
     }
+
+    */
   }
 
   const recoverAction = () => {

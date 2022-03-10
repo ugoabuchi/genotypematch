@@ -75,13 +75,11 @@ export const isLoggedIn = ({ login_session, mandate, yourCallBack = null }: IsLo
 }, [login_session.login_session]);
 
 
-export const StartUpHeaderConfiguration = ({ login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action, notifyBeforeBackHandler = false, backScreenDispatch, yourCallBack = null, setTimer = -1 }: StartUpHeaderConfigType) => useEffect(() => {
+export const StartUpHeaderConfiguration = ({ login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action, notifyBeforeBackHandler = false, backScreenDispatch, yourCallBack = null, setTimer = -1, backHandlerRef, timerHandlerRef }: StartUpHeaderConfigType) => useEffect(() => {
 
 
-  //clear timeout
-  clearTimeout();
   //onBackHandler
-  BackHandler.addEventListener('hardwareBackPress', () => {
+ backHandlerRef.current = BackHandler.addEventListener('hardwareBackPress', () => {
     backScreenDispatch();
     return true
   })
@@ -89,7 +87,7 @@ export const StartUpHeaderConfiguration = ({ login_session, profile_session, gen
 
   //setTimer as params is only applicable to StartUpSplash Screen
   if (setTimer != -1 && setTimer > 0) {
-    setTimeout(() => {
+    timerHandlerRef.current = setTimeout(() => {
 
 
       //check if its initial app load
@@ -137,8 +135,6 @@ export const StartUpHeaderConfiguration = ({ login_session, profile_session, gen
 
                     }
 
-                    clearTimeout();
-                    BackHandler.removeEventListener('hardwareBackPress', () => true);
                     if (yourCallBack != null)
                       yourCallBack();
 
@@ -159,8 +155,6 @@ export const StartUpHeaderConfiguration = ({ login_session, profile_session, gen
 
       }
       else {
-        clearTimeout();
-        BackHandler.removeEventListener('hardwareBackPress', () => true);
         if (yourCallBack != null)
           yourCallBack();
       }
@@ -169,13 +163,15 @@ export const StartUpHeaderConfiguration = ({ login_session, profile_session, gen
     }, setTimer * 1000)
   }
 
+  return () => {
+    clearTimeout(timerHandlerRef.current);
+    BackHandler.removeEventListener('hardwareBackPress', backHandlerRef.current);
+  };
 
 }, []);
 
 
 export const logOut = ({ login_session, general_session, login_session_action }: logOutType) => {
-
-  BackHandler.removeEventListener('hardwareBackPress', () => true);
 
 
   if (login_session.login_session == true) {
@@ -256,13 +252,28 @@ export const getAge = (DOB: Date) => {
 }
 
 
-export const SvgImager = ({ url }: { url: string }) => (
-  <SvgUri
+export const SvgImager = ({ url }: { url: string }) => {
+
+  try{
+      
+    const SVGImage = (
+      <SvgUri
     width="20"
     height="16"
     viewBox="0 0 640 480"
     uri={url}
   />
-);
+    );
+
+    return SVGImage;
+
+  }
+  catch(err){
+
+    return <></>
+    
+  }
+
+}
 
 

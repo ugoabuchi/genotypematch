@@ -14,18 +14,7 @@ export type GeneralSessionType = {
     bearer: string,
     settings: {
       statusBar: boolean,
-            fingerprint: boolean,
-            notification: {
-                background: boolean,
-                style : "slide" | "popup",
-                messages: boolean,
-                likes: boolean,
-                gifts: boolean,
-                profile: boolean,
-                upgrades: boolean,
-                payments: boolean,
-                general: boolean,
-            }
+      fingerprint: boolean
     }
 
   };
@@ -103,7 +92,7 @@ export type FormInputBoxType = {
 export type APIResponse = {
 
   response: string;
-  message: string;
+  message?: string;
   data?: any;
 
 }
@@ -270,6 +259,8 @@ export type StartUpHeaderConfigType = {
   backScreenDispatch: () => void
   yourCallBack?: (() => void) | null;
   setTimer?: number;
+  backHandlerRef : any;
+  timerHandlerRef : any;
 
 }
 

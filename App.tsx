@@ -1,3 +1,4 @@
+import * as Notifications from 'expo-notifications';
 import * as React from 'react';
 import AppLoading from 'expo-app-loading';
 import { BeforeLoginStack } from './screens/Mainnavigator';
@@ -5,6 +6,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import AppStore from './redux/store/AppStore';
 import * as Font from 'expo-font';
+
+Notifications.setNotificationHandler(null);
 
 const store = AppStore();
 
@@ -19,6 +22,7 @@ const loadFonts = () => {
 export default function App() {
   
   const [ fontsLoaded, setFontsLoaded ] = React.useState(false);
+
 
   if (!fontsLoaded) {
     return (

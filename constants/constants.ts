@@ -165,7 +165,20 @@ export const AGERANGE_LIST = {
   RANDOM: "Random"
 }
 
+export const GM_NOTIFICATION = {
+  YUP_USER_SUCESS: "yup-user-success",
+  USER_MATCH_SUCCESS: "user-match-success",
+  YUP_ALREADY_SUCCESS: "yup-already-liked",
+  YUP_INVALID_MATCH_USER: "yup-invalid-match-user",
+  GIFT_USER_SUCCESS: "gift-user-success",
+  GIFT_INSUFFICIENT_GC: "gift-insufficient-gc",
+  GIFT_SELECTED_GIFT_ITEM_UNAVAILABLE: "gift-selected-gift-item-unavailable",
+  GIFT_INVALID_MATCH_USER: "gift-Invalid-match-user",
+  CHAT_MESSAGE_RECIEVED: "chat-message-recieved",
+  CHAT_MESSAGE_ERROR: "chat-message-error",
+  ADMIN_MESSAGE_RECIEVED: "admin-message-recieved",
 
+};
 
 //Old updates
 

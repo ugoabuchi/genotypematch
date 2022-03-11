@@ -26,7 +26,7 @@ import { getMatchResults, sendYUP } from '../components/axios';
 import { AlertBoxStateParamType, MatchFilterType, NavPropsType, ModalStateType, MatchesCardType, mCard, CardType, buttonParamType } from '../types';
 import { BloodBagIcon, FemaleGenderIcon, FilterIcon, GiftIcon, MaleGenderIcon, MenuIcon, NopeIcon, PREMIUMDisplayIcon, VerifiedUser100Icon, VIPDisplayIcon, YupIcon, BASICDisplayIcon, VerifiedUser50Icon, VerifiedUser10Icon, LoadIndicator, PrimaryLoadingIndicator, LocationIcon } from '../components/Icon';
 import { PulseViewAnimation } from '../components/Animations';
-import { ACCOUNT_TYPES, MATCH_REQUEST_LIMIT, ReQUEST_IMAGE_URL } from '../constants/constants';
+import { ACCOUNT_TYPES, GM_NOTIFICATION, MATCH_REQUEST_LIMIT, REDUX_SESSION_LOCAL_STORE_KEYS, ReQUEST_IMAGE_URL } from '../constants/constants';
 import { requestGeoLocationPermission, getGeoLocationPermission, getGeoCoords, getGeoCoordsLocationDetails } from '../components/locationManager';
 import SwipeCards from 'react-native-swipe-cards-deck';
 import { SubButton } from '../components/Button';
@@ -37,13 +37,7 @@ import {APP_RESPONSE} from '../constants/constants';
 
 
     //Setting notification handler
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-      }),
-    });
+
 
 const GMHome = ({ navigation, route, login_session, profile_session, general_session, login_session_action, profile_session_action, general_session_action }: NavPropsType) => {
 
@@ -159,13 +153,182 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
       return true;
     });
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
+    Notifications.setNotificationHandler({
+
+
+      handleNotification: async ( notification: Notifications.Notification ) => {
+
+        const recievedContent = notification.request.content.data;
+
+        if(recievedContent.response != undefined && recievedContent.response != null)
+        {
+
+          if(recievedContent.response == GM_NOTIFICATION.YUP_USER_SUCESS 
+            || recievedContent.response == GM_NOTIFICATION.USER_MATCH_SUCCESS 
+            || recievedContent.response == GM_NOTIFICATION.YUP_ALREADY_SUCCESS 
+            || recievedContent.response == GM_NOTIFICATION.YUP_INVALID_MATCH_USER 
+            || recievedContent.response == GM_NOTIFICATION.GIFT_USER_SUCCESS 
+            || recievedContent.response == GM_NOTIFICATION.GIFT_INSUFFICIENT_GC 
+            || recievedContent.response == GM_NOTIFICATION.GIFT_SELECTED_GIFT_ITEM_UNAVAILABLE 
+            || recievedContent.response == GM_NOTIFICATION.GIFT_INVALID_MATCH_USER 
+            || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_RECIEVED 
+            || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_ERROR 
+            || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED){
+
+            return {
+              shouldShowAlert: true,
+              shouldPlaySound: true,
+              shouldSetBadge: false,
+            }
+
+          }
+          else{
+
+          return {
+            shouldShowAlert: false,
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+          }
+          
+        }
+
+        }
+        else{
+
+          return {
+            shouldShowAlert: false,
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+          }
+          
+        }
+
+      },
+
+
+
+    });
+
+    notificationListener.current = Notifications.addNotificationReceivedListener( ( notification: Notifications.Notification )  => {
+      //setNotification(notification);
+      const recievedContent = notification.request.content.data;
+      if(recievedContent.response == GM_NOTIFICATION.YUP_USER_SUCESS 
+        || recievedContent.response == GM_NOTIFICATION.YUP_ALREADY_SUCCESS 
+        || recievedContent.response == GM_NOTIFICATION.YUP_INVALID_MATCH_USER 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_USER_SUCCESS 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_INSUFFICIENT_GC 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_SELECTED_GIFT_ITEM_UNAVAILABLE 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_INVALID_MATCH_USER 
+        || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_ERROR 
+        || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED){
+
+          general_session_action(
+            {
+              ...general_session.general_session,
+              GNC: recievedContent.GNC
+            },
+            {
+              allow: general_session.general_session.storeLocalData,
+              key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+            }
+          );
+          
+
+        }
+      else if(recievedContent.response == GM_NOTIFICATION.USER_MATCH_SUCCESS){
+
+        general_session_action(
+          {
+            ...general_session.general_session,
+            MNC: recievedContent.MNC
+          },
+          {
+            allow: general_session.general_session.storeLocalData,
+            key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+          }
+        );
+        
+      }
+      else if(recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_RECIEVED){
+        
+        general_session_action(
+          {
+            ...general_session.general_session,
+            CNC: recievedContent.CNC
+          },
+          {
+            allow: general_session.general_session.storeLocalData,
+            key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+          }
+        );
+
+      }
+      //console.log(recievedContent);
     });
 
     // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+    responseListener.current = Notifications.addNotificationResponseReceivedListener( (response: Notifications.NotificationResponse) => {
+      const recievedContent = response.notification.request.content.data;
+
+      if(recievedContent.response == GM_NOTIFICATION.YUP_USER_SUCESS
+        || recievedContent.response == GM_NOTIFICATION.YUP_ALREADY_SUCCESS 
+        || recievedContent.response == GM_NOTIFICATION.YUP_INVALID_MATCH_USER 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_USER_SUCCESS 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_INSUFFICIENT_GC 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_SELECTED_GIFT_ITEM_UNAVAILABLE 
+        || recievedContent.response == GM_NOTIFICATION.GIFT_INVALID_MATCH_USER 
+        || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_ERROR 
+        || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED){
+
+          general_session_action(
+            {
+              ...general_session.general_session,
+              GNC: recievedContent.GNC
+            },
+            {
+              allow: general_session.general_session.storeLocalData,
+              key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+            }
+          );
+
+        navigation.navigate('AfterLogin', {
+          screen: 'Notifications'
+        });
+
+      }
+      else if(recievedContent.response == GM_NOTIFICATION.USER_MATCH_SUCCESS){
+
+        general_session_action(
+          {
+            ...general_session.general_session,
+            MNC: recievedContent.MNC
+          },
+          {
+            allow: general_session.general_session.storeLocalData,
+            key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+          }
+        );
+        navigation.navigate('AfterLogin', {
+          screen: 'Matches'
+        });
+      }
+      else if(recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_RECIEVED){
+
+        general_session_action(
+          {
+            ...general_session.general_session,
+            CNC: recievedContent.CNC
+          },
+          {
+            allow: general_session.general_session.storeLocalData,
+            key: REDUX_SESSION_LOCAL_STORE_KEYS.general_session
+          }
+        );
+        navigation.navigate('AfterLogin', {
+          screen: 'Chats'
+        });
+      }
+
     });
 
 

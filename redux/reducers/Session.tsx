@@ -25,8 +25,12 @@ const initialStateofGeneral =  {
         bearer: getBearer(),
         settings: {
             statusBar: false,
-            fingerprint: false
-        }
+            fingerprint: false,
+        },
+        GNC: 0, //General notification count
+        MNC: 0, //Matches notification count
+        CNC: 0, //Chat notification count
+        
     }
 }
 

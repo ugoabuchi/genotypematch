@@ -15,7 +15,10 @@ export type GeneralSessionType = {
     settings: {
       statusBar: boolean,
       fingerprint: boolean
-    }
+    },
+    GNC: number,
+    MNC: number,
+    CNC: number
 
   };
 
@@ -391,6 +394,7 @@ export type MatchesCardType = {
 export type CardType = {
   card: MatchesCardType
 }
+
 
 
 

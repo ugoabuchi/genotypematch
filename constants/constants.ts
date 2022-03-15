@@ -68,6 +68,12 @@ export const API_RESPONSE = {
     ALREADYLIKED: "already-liked",
     INVALIDMATCHUSER: "invalid-match-user"
   },
+  NOPE: {
+    SUCCESS: true,
+    NOPENOTLIKED: "nope-not-already-liked",
+    INVALIDNOPEMATCHUSER: "nope-invalid-match-user",
+    NOPEALREAYMATCHED: "nope-already-matched"
+  },
 }
 
 export const APP_RESPONSE = {
@@ -104,6 +110,12 @@ export const APP_RESPONSE = {
     SUCCESS: "yup-success",
     ALREADYLIKED: "yup-exist",
     INVALIDMATCHUSER: "match-user-invalid"
+  },
+  NOPE: {
+    SUCCESS: "nope-success",
+    NOPENOTLIKED: "nope-not-liked",
+    INVALIDNOPEMATCHUSER: "nope-match-user-invalid",
+    NOPEALREAYMATCHED: "nope-matched"
   },
 }
 
@@ -177,6 +189,7 @@ export const GM_NOTIFICATION = {
   CHAT_MESSAGE_RECIEVED: "chat-message-recieved",
   CHAT_MESSAGE_ERROR: "chat-message-error",
   ADMIN_MESSAGE_RECIEVED: "admin-message-recieved",
+  USER_UNMATCH_RECIEVED: "user-unmatch-recieved"
 
 };
 

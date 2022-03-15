@@ -130,6 +130,12 @@ const ENGLISH = {
         ALREADYLIKED: "You already Yupped\nthis user",
         INVALIDMATCHUSER: "User to be matched\nis invalid"
       },
+      NOPE: {
+        SUCCESS: "Nope success",
+        NOPENOTLIKED: "No previous Yup for\nthis user",
+        INVALIDNOPEMATCHUSER: "Invalid account type,\nuse the app properly",
+        NOPEALREAYMATCHED: "Invalid operation on\nmatched user"
+      },
 
     },
     GENDER_LIST: [

@@ -328,6 +328,94 @@ const sendYUP = async (params: URLSearchParams, language: any): Promise<APIRespo
 };
 
 
+const sendNope = async (params: URLSearchParams, language: any): Promise<APIResponse> => {
+  
+  params.append('action', 'performNope');
+  
+  try {
+    const user = await axios.post(ReQUEST_URL, params, AXIOS_HEADER_CONFIG);
+    const userData: ServerResponse = user.data;
+          if(userData.response == API_RESPONSE.NOPE.SUCCESS)
+          {
+            return {
+              response: APP_RESPONSE.NOPE.SUCCESS,
+              message: language.GENERAL.RESPONSE.NOPE.SUCCESS
+            };
+          }
+          else if(userData.response == API_RESPONSE.NOPE.NOPEALREAYMATCHED)
+          {
+            return {
+              response: APP_RESPONSE.NOPE.NOPEALREAYMATCHED,
+              message: language.GENERAL.RESPONSE.NOPE.NOPEALREAYMATCHED
+            };
+          }
+          else if(userData.response == API_RESPONSE.NOPE.NOPENOTLIKED)
+          {
+            return {
+              response: APP_RESPONSE.NOPE.NOPENOTLIKED,
+              message: language.GENERAL.RESPONSE.NOPE.NOPENOTLIKED
+            };
+          }
+          else if(userData.response == API_RESPONSE.NOPE.INVALIDNOPEMATCHUSER)
+          {
+            return {
+              response: APP_RESPONSE.NOPE.INVALIDNOPEMATCHUSER,
+              message: language.GENERAL.RESPONSE.NOPE.INVALIDNOPEMATCHUSER
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.USERNAMEREGEXFALSE)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.USERNAMEREGEXFALSE,
+              message: language.GENERAL.RESPONSE.GENERAL.USERNAMEREGEXFALSE
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.TOKENFALSE)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.TOKENFALSE,
+              message: language.GENERAL.RESPONSE.GENERAL.TOKENFALSE
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.INSECURENETWORK)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.INSECURENETWORK,
+              message: language.GENERAL.RESPONSE.GENERAL.INSECURENETWORK
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.USERNAMEORACTIONNULL)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.USERNAMEORACTIONNULL,
+              message: language.GENERAL.RESPONSE.GENERAL.USERNAMEORACTIONNULL
+            };
+          }
+          else if(userData.response == API_RESPONSE.GENERAL.ACTIONFALSE)
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.ACTIONFALSE,
+              message: language.GENERAL.RESPONSE.GENERAL.ACTIONFALSE
+            };
+          }
+          else
+          {
+            return {
+              response: APP_RESPONSE.GENERAL.SERVER,
+              message: language.GENERAL.RESPONSE.GENERAL.SERVER
+            }
+          }
+      
+    
+    
+  } catch (error: any) {
+    return {
+      response: APP_RESPONSE.GENERAL.NONETWORK,
+      message: language.GENERAL.RESPONSE.GENERAL.NONETWORK
+    };
+  }
+};
+
 
 
 
@@ -454,6 +542,7 @@ export {
   addUser,
   getMatches,
   sendYUP,
+  sendNope,
   verifyAccount,
   checkEmailNotVerified,
   sendEmailVerificationMail,

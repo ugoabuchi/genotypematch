@@ -22,8 +22,8 @@ import { Badge } from 'react-native-paper';
 import { getAge, getCountryByIndex, getCountryIndexByCountryCode, getCountryStateIndexByCountryCodeandState, getMyCountryCodeName, isLoggedIn, myCountryList, myCountryStatelist, SvgImager } from '../components/common';
 import { MyAlert } from '../components/PopUp';
 import { AccountListDropDown, AgeListDropDown, CountryListDropDown, CountryStateListDropDown, GenderListDropDown, GenotypeListDropDown } from '../components/ListDropDown';
-import { getMatchResults, sendYUP } from '../components/axios';
-import { AlertBoxStateParamType, MatchFilterType, NavPropsType, ModalStateType, MatchesCardType, mCard, CardType, buttonParamType } from '../types';
+import { getMatchResults, sendYUP, sendNope } from '../components/axios';
+import { AlertBoxStateParamType, MatchFilterType, NavPropsType, MatchesCardType, CardType, buttonParamType } from '../types';
 import { BloodBagIcon, FemaleGenderIcon, FilterIcon, GiftIcon, MaleGenderIcon, MenuIcon, NopeIcon, PREMIUMDisplayIcon, VerifiedUser100Icon, VIPDisplayIcon, YupIcon, BASICDisplayIcon, VerifiedUser50Icon, VerifiedUser10Icon, LoadIndicator, PrimaryLoadingIndicator, LocationIcon } from '../components/Icon';
 import { PulseViewAnimation } from '../components/Animations';
 import { ACCOUNT_TYPES, GM_NOTIFICATION, MATCH_REQUEST_LIMIT, REDUX_SESSION_LOCAL_STORE_KEYS, ReQUEST_IMAGE_URL } from '../constants/constants';
@@ -157,7 +157,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
 
       handleNotification: async ( notification: Notifications.Notification ) => {
-
+        
         const recievedContent = notification.request.content.data;
 
         if(recievedContent.response != undefined && recievedContent.response != null)
@@ -173,7 +173,8 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
             || recievedContent.response == GM_NOTIFICATION.GIFT_INVALID_MATCH_USER 
             || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_RECIEVED 
             || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_ERROR 
-            || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED){
+            || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED
+            || recievedContent.response == GM_NOTIFICATION.USER_UNMATCH_RECIEVED){
 
             return {
               shouldShowAlert: true,
@@ -220,7 +221,8 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         || recievedContent.response == GM_NOTIFICATION.GIFT_SELECTED_GIFT_ITEM_UNAVAILABLE 
         || recievedContent.response == GM_NOTIFICATION.GIFT_INVALID_MATCH_USER 
         || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_ERROR 
-        || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED){
+        || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED
+        || recievedContent.response == GM_NOTIFICATION.USER_UNMATCH_RECIEVED){
 
           general_session_action(
             {
@@ -278,7 +280,8 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
         || recievedContent.response == GM_NOTIFICATION.GIFT_SELECTED_GIFT_ITEM_UNAVAILABLE 
         || recievedContent.response == GM_NOTIFICATION.GIFT_INVALID_MATCH_USER 
         || recievedContent.response == GM_NOTIFICATION.CHAT_MESSAGE_ERROR 
-        || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED){
+        || recievedContent.response == GM_NOTIFICATION.ADMIN_MESSAGE_RECIEVED
+        || recievedContent.response == GM_NOTIFICATION.USER_UNMATCH_RECIEVED){
 
           general_session_action(
             {
@@ -860,6 +863,7 @@ const handleOpenSettings = () => {
 
   const handleNope = (currentCard: MatchesCardType) => {
 
+    NopeRequester(currentCard.id);
     return true;
 
   }
@@ -899,6 +903,21 @@ const handleOpenSettings = () => {
 
   }
 
+  const NopeRequester = async (matchuserdbID: string) : Promise<void> => {
+
+    const coords = await getGeoCoords();
+      if(coords)
+      {
+        const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token', profile_session.profile_session.token);
+        params.append('matchuserdbID', matchuserdbID);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        await sendNope(params, Lang);
+      }
+
+  }
+
   const NopeSwipeDesign = () => {
     const SCREEN_WIDTH = Dimensions.get('window').width
     return (
@@ -925,7 +944,7 @@ const handleOpenSettings = () => {
         borderRadius: 0,
         width: SCREEN_WIDTH - (18 * (SCREEN_WIDTH / 100)),
         textAlign: 'center'
-      }}>Like</Text>
+      }}>Yup</Text>
     );
   }
 

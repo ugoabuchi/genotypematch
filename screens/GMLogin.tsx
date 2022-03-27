@@ -116,17 +116,31 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
       showAlert: false
     });
 
+      //lock entry fields
+      setData({
+        ...data,
+        editable: false
+      })
+      //disable signin button
+      setSignButton({
+        ...singinButton,
+        showLoader: true
+      });
+
     try{
-        //reload exponent push notificatoin token and on the server end must be request on every login which should always be updated in the backend
+
+   //reload exponent push notificatoin token and on the server end must be request on every login which should always be updated in the backend
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
-  if (existingStatus !== 'granted') {
+
+  if (status !== 'granted') {
 
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
 
   }
-  else if (finalStatus !== 'granted') {
+
+  if (finalStatus !== 'granted') {
 
     setData({
       ...data,
@@ -163,16 +177,7 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
     
     //Lets perform login operation  now
     if (data.username != null && data.password != null) {
-      //lock entry fields
-      setData({
-        ...data,
-        editable: false
-      })
-      //disable signin button
-      setSignButton({
-        ...singinButton,
-        showLoader: true
-      });
+
 
       //send to API Server
       const params = new URLSearchParams();
@@ -280,6 +285,17 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
 
     }
     else {
+      //couldn't login - Empty Fields
+        //unlock entry fields
+        setData({
+          ...data,
+          editable: true
+        })
+        //disable signin button
+        setSignButton({
+          ...singinButton,
+          showLoader: false
+        });
       setAlertBox({
         ...alertBox,
         alertType: 'error',

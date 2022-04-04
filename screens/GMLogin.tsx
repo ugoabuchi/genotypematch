@@ -130,8 +130,8 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
     try{
 
    //reload exponent push notificatoin token and on the server end must be request on every login which should always be updated in the backend
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+  const { status } = await Notifications.getPermissionsAsync();
+  let finalStatus = status;
 
   if (status !== 'granted') {
 

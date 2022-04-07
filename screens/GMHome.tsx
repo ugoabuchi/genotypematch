@@ -1574,9 +1574,9 @@ const handleOpenSettings = () => {
 
       <FlatList 
       data = {giftItemsArg}
-      keyExtractor = {item => (item.key).toString()}
+      keyExtractor = {item => item.identifier}
       numColumns = {3}
-      renderItem = {({ item }) => (
+      renderItem = {({item}) => (
         <View style={{
           width: Dimensions.get("window").width / 3,
           height: Dimensions.get("window").width / 3,

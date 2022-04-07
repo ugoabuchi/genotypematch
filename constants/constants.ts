@@ -23,7 +23,9 @@ export const COPYRIGHTS = {
     founder: "KINGSLEY PIUS"
   }
 }
-export const MAIN_URL = "http://10.0.2.2/genotypematch-web/";
+
+//export const MAIN_URL = "http://10.0.2.2/genotypematch-web/";
+export const MAIN_URL = "http://172.26.112.1/genotypematch-web/";
 //export const MAIN_URL = EXPO_UNDERLAY_SERVER_LINK+"/genotypematch-web/";
 export const ReQUEST_URL = MAIN_URL + "API_REQUEST";
 export const ReQUEST_IMAGE_URL = MAIN_URL + "webapp/File_Uploads/Gallery/Images";

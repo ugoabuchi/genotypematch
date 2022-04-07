@@ -59,7 +59,7 @@ export const ModalPopUpBox = ({theme, language, title = null, showModal = false,
 
             :
 
-            ({content})
+            content
 
           }
         </View>

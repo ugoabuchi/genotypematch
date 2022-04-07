@@ -230,6 +230,7 @@ export type ModalPopUp = {
   title: string;
   showModal: boolean; 
   content: JSX.Element;
+  enableContentScrollView?: boolean;
   showConfirm?: boolean;
   confirmText?: string;
   confirmAction?: () => void;
@@ -394,6 +395,13 @@ export type MatchesCardType = {
 export type CardType = {
   card: MatchesCardType
 }
+
+export type LoadedGifts = {
+  key: number;
+  identifier: string;
+  ext: string;
+}
+
 
 
 

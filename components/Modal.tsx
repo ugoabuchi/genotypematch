@@ -3,7 +3,7 @@ import { Modal } from "react-native-paper"
 import { View, Text, ScrollView, TouchableOpacity } from "react-native"
 import { ModalPopUp } from "../types"
 
-export const ModalPopUpBox = ({theme, language, title = null, showModal = false, content, showConfirm = false, confirmText = null, confirmAction = ()=>{}, closeAction} : ModalPopUp) => {
+export const ModalPopUpBox = ({theme, language, title = null, showModal = false, content, enableContentScrollView = true, showConfirm = false, confirmText = null, confirmAction = ()=>{}, closeAction} : ModalPopUp) => {
 
     return <Modal
     visible ={showModal}
@@ -46,9 +46,22 @@ export const ModalPopUpBox = ({theme, language, title = null, showModal = false,
 
         {/* Body */}
         <View style={theme.Modal.PopUp.body}>
-          <ScrollView>
-            {content}
-          </ScrollView>
+          {
+            enableContentScrollView == true
+
+            ?
+
+            (
+              <ScrollView>
+              {content}
+              </ScrollView>
+            )
+
+            :
+
+            ({content})
+
+          }
         </View>
 
       </View>

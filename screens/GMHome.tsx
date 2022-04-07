@@ -7,7 +7,8 @@ import {
   Dimensions,
   TouchableOpacity,
   Linking,
-  Platform
+  Platform,
+  FlatList
 } from 'react-native';
 import {
   changeLoginSession,
@@ -23,7 +24,7 @@ import { getAge, getCountryByIndex, getCountryIndexByCountryCode, getCountryStat
 import { MyAlert } from '../components/PopUp';
 import { AccountListDropDown, AgeListDropDown, CountryListDropDown, CountryStateListDropDown, GenderListDropDown, GenotypeListDropDown } from '../components/ListDropDown';
 import { getMatchResults, sendYUP, sendNope } from '../components/axios';
-import { AlertBoxStateParamType, MatchFilterType, NavPropsType, MatchesCardType, CardType, buttonParamType } from '../types';
+import { AlertBoxStateParamType, MatchFilterType, NavPropsType, MatchesCardType, CardType, buttonParamType, LoadedGifts } from '../types';
 import { BloodBagIcon, FemaleGenderIcon, FilterIcon, GiftIcon, MaleGenderIcon, MenuIcon, NopeIcon, PREMIUMDisplayIcon, VerifiedUser100Icon, VIPDisplayIcon, YupIcon, BASICDisplayIcon, VerifiedUser50Icon, VerifiedUser10Icon, LoadIndicator, PrimaryLoadingIndicator, LocationIcon } from '../components/Icon';
 import { PulseViewAnimation } from '../components/Animations';
 import { ACCOUNT_TYPES, GM_NOTIFICATION, MATCH_REQUEST_LIMIT, REDUX_SESSION_LOCAL_STORE_KEYS, ReQUEST_IMAGE_URL } from '../constants/constants';
@@ -45,7 +46,6 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
   const Lang = general_session.general_session.Language;
 
   //set notification state variables
-  const [notification, setNotification] = useState<any>(false);
   const backHandlerListener = useRef<any>();
   const notificationListener = useRef<any>();
   const responseListener = useRef<any>();
@@ -107,6 +107,25 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
 
   const [modalFilterConfirmText, setModalFilterConfirmText] = useState<string>(null);
 
+
+
+  const [giftFilterTitle, setGiftFilterTitle] = useState<string>(null);
+
+  const [showMyGoftFilter, setShowMyGiftFilter] = useState<boolean>(false);
+
+  const [showModalGiftConfirm, setShowModalGiftConfirm] = useState<boolean>(true);
+
+  const [giftFilterConfirmText, setGiftFilterConfirmText] = useState<string>(null);
+
+  const [giftID, setGiftID] = useState<string>(null);
+
+  const [giftItems, setGiftitems] = useState<LoadedGifts[]>(null);
+  
+  const [giftsLoading, setGiftloading] = useState<boolean>(false);
+
+
+
+
   const [cards, setCard] = useState<MatchesCardType[]>(null);
 
   const [swiper, setSwiper] = useState<any>({ swipeYup: () => { }, swipeNope: () => { }, swipeMaybe: () => { } });
@@ -114,6 +133,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [loadingMessage, setLoadingMessage] = useState<string>(null);
+
 
   const [isLocation, setisLocation] = useState<{
     enabled: boolean | string,
@@ -335,7 +355,12 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     });
 
 
+    //set GiftID
 
+    setGiftID("");
+    setGiftloading(false);
+
+    
     //update permission state
     getGeoLocationPermission_sub()
 
@@ -847,6 +872,119 @@ const handleOpenSettings = () => {
                  
   }
 
+  const sendGift = () =>{
+    if(giftID != null && giftID != "")
+    {
+      setShowMyGiftFilter(false);
+
+      
+    console.log("lets Send the gift")
+    //lets send the gift here
+
+
+    }
+    else
+    {
+      setAlertBox({
+        ...alertBox,
+        alertType: "error",
+        title: null,
+        message: Lang.GENERAL.DEFAULT_GIFT_SEND_ERROR,
+        cancelText: Lang.GENERAL.DEFAULT_ALERT_CANCEL_TEXT,
+        showConfirm: false,
+        showAlert: true,
+        cancelAction: () => cancelAlert()
+      });
+    }
+  }
+  
+
+  const giftModalClose = () =>{
+    setShowMyGiftFilter(false);
+    setGiftloading(false);
+  }
+
+  const LoadAvailableGifts = () =>{
+    if(giftsLoading == false)
+      setGiftloading(true);
+
+    
+  if(giftItems != null && giftItems.length > 0)
+  {
+    const asyncSetGiftitems = async () => {
+
+      //call Axios to load from server, compare result if new then update giftitems
+      let result : LoadedGifts[] = null;
+
+      //sample gift result for testing, delete and load from API using axios
+      result = [
+        {key: 0, identifier:'HJklsoo13JDK98eRTyEHHDJCKsfsKSIkkd1', ext: 'gif'},
+        {key: 1, identifier:'XcBNDoi34JkOiusoIOEuMjkaiOlakLoIUn1', ext: 'gif'},
+        {key: 2, identifier:'POu3JKKoIEknJjjskKKAkKEEKKKahHgDH2', ext: 'gif'},
+      ];
+
+      if(result != null && result.length > 0){
+
+        if( result.length > giftItems.length)
+        {
+          setGiftitems(result);
+        }
+        else
+        {
+          let isUpdateAvailable : boolean = false;
+
+          for(let i = 0; i < result.length; i++){
+
+            let updateCount : number = 0;
+            for(let j = 0; j < giftItems.length; j++){
+
+              if(giftItems[j].identifier != result[i].identifier && giftItems[j].ext != result[i].ext)
+              {
+                  updateCount = 1;
+              }
+              else
+              {
+                  updateCount = 0;
+              }
+
+            }
+
+            //update updateCounter if available
+            if(updateCount == 1)
+              {
+                isUpdateAvailable = true;
+                break;
+              }
+              
+          }
+
+
+          //check if new update exist
+          if(isUpdateAvailable)
+            setGiftitems(result);
+
+        }
+
+      }
+
+    }
+
+    asyncSetGiftitems();
+  }
+  else
+  {
+    //call Axios to load from server
+    //sample gift load
+    setGiftitems([
+      {key: 0, identifier:'HJklsoo13JDK98eRTyEHHDJCKsfsKSIkkd1', ext: 'gif'},
+      {key: 1, identifier:'XcBNDoi34JkOiusoIOEuMjkaiOlakLoIUn1', ext: 'gif'},
+      {key: 2, identifier:'POu3JKKoIEknJjjskKKAkKEEKKKahHgDH2', ext: 'gif'},
+    ]);
+  }
+    
+
+  }
+
   //hold previous temp filter values when in filter menu
   const storeTemporaryFilterValue = (previouaFilter: MatchFilterType) => {
     setTemporaryFilterValues(previouaFilter);
@@ -869,8 +1007,13 @@ const handleOpenSettings = () => {
   }
 
   const handleGift = (currentCard: MatchesCardType) => {
-
-    return true;
+    
+    setGiftID("");
+    setGiftFilterTitle(Lang.GENERAL.DEFAULT_GIFT_MODAL_TITLE);
+    setShowModalGiftConfirm(true);
+    setGiftFilterConfirmText(Lang.GENERAL.DEFAULT_GIFT_SEND_TEXT);
+    setShowMyGiftFilter(true);
+    //return true;
 
   }
 
@@ -1425,6 +1568,90 @@ const handleOpenSettings = () => {
   )
 
 
+  const giftitemsView = (giftItemsArg : LoadedGifts[]) => {
+
+    return (
+
+      <FlatList 
+      data = {giftItemsArg}
+      keyExtractor = {item => (item.key).toString()}
+      numColumns = {3}
+      renderItem = {({ item }) => (
+        <View style={{
+          width: Dimensions.get("window").width / 3,
+          height: Dimensions.get("window").width / 3,
+          backgroundColor: '#1F3A68'
+        }}>
+
+          <View style={{
+            flex: 1,
+            margin: 3,
+            backgroundColor: '#000000'
+          }}>
+
+          </View>
+
+        </View>
+      )}
+
+      />
+
+      )
+
+
+  }
+
+
+  const noGiftItemView = () => {
+
+    return (
+      <View><Text>No gift available, work on this view ohh</Text></View>
+    )
+  }
+
+  const GiftContainerView = ({giftedItemArg, giftModalIsOpen} : {giftedItemArg : LoadedGifts[], giftModalIsOpen: boolean}) => {
+
+
+    useEffect(()=>{
+      if(giftModalIsOpen == true)
+      {
+        LoadAvailableGifts();
+      }
+
+    }, [giftModalIsOpen])
+
+
+    return (
+      <View>
+        <View style={{
+          width: "100%",
+          marginTop: 25,
+          backgroundColor: '#EEEEEE'
+        }}>
+        
+        {
+          giftedItemArg != null && giftedItemArg.length > 0
+
+          ?
+
+          giftitemsView(giftedItemArg)
+
+          :
+
+          noGiftItemView()
+
+
+        }
+      </View>
+      </View>
+    )
+    
+  }
+
+
+
+
+
 
 
 
@@ -1547,6 +1774,21 @@ const handleOpenSettings = () => {
       showModal = {showMyModalFilter}
       
       />
+
+    <ModalPopUpBox
+        
+        theme = {Theme}
+        language = {Lang}
+        title = {giftFilterTitle}
+        content = {<GiftContainerView giftedItemArg={giftItems} giftModalIsOpen={showMyGoftFilter}/>}
+        confirmText = {giftFilterConfirmText}
+        confirmAction = {() => sendGift()}
+        closeAction = {()=> giftModalClose()}
+        showConfirm = {showModalGiftConfirm}
+        showModal = {showMyGoftFilter}
+        enableContentScrollView = {false}
+        
+        />
 
       <MyAlert
         theme={Theme}

@@ -130,7 +130,7 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
     try{
 
    //reload exponent push notificatoin token and on the server end must be request on every login which should always be updated in the backend
-  const { status } = await Notifications.getPermissionsAsync().catch((err) => {throw "EPKERR 1"});
+  /*const { status } = await Notifications.getPermissionsAsync().catch((err) => {throw "EPKERR 1"});
   let finalStatus = status;
 
   if (status !== 'granted') {
@@ -165,15 +165,19 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
   {
 
     const exponentpushnotificationtoken = await Notifications.getExpoPushTokenAsync().then((value) => value.data).catch((err) => {throw "EPKERR 3"});
+*/
 
-    if (Platform.OS === 'android') {
+    const exponentpushnotificationtoken = "ExponentPushToken[9iEyNWGC6I5nYE4sms67sP]";
+    //const exponentpushnotificationtoken = "ExponentPushToken[EyNWGjjkfdsC6I5nYE4sms698OH]";
+    //const exponentpushnotificationtoken = "ExponentPushToken[7OLxdMGCWhE__Fl-BHtKhn]";
+    /*if (Platform.OS === 'android') {
       Notifications.setNotificationChannelAsync('default', {
         name: 'default',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#FF231F7C',
       });
-    }
+    }*/
     
     //Lets perform login operation  now
     if (data.username != null && data.password != null) {
@@ -307,7 +311,7 @@ const GMLogin = ({ navigation, route, login_session, profile_session, general_se
     }
 
     
-  }
+  /*}*/
     }
     catch(err){
       

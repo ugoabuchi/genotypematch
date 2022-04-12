@@ -32,7 +32,7 @@ const ENGLISH = {
     DEFAULT_MODAL_CORNFIRM_TEXT: "Confirm",
     DEFAULT_GIFT_SEND_TEXT: "Send",
     DEFAULT_GIFT_MODAL_TITLE: "Available gifts",
-    DEFAULT_GIFT_SEND_ERROR: "Select gift to send",
+    DEFAULT_GIFT_SEND_ERROR: "Select a gift to send",
     EXITAPP: "Are you sure, you want to exit?",
     OK: "OK",
     YES: "Yes",
@@ -138,6 +138,11 @@ const ENGLISH = {
         NOPENOTLIKED: "No previous Yup for\nthis user",
         INVALIDNOPEMATCHUSER: "Invalid account type,\nuse the app properly",
         NOPEALREAYMATCHED: "Invalid operation on\nmatched user"
+      },
+      LOAD_GIFT_ITEMS_AVAIL: {
+        SUCCESS: "Gift items available",
+        NOGIFTITEMSAVAILABLE: "Gift items Unavailable",
+        INVALIDLOADGIFTREQUEST: "Invalid load gift operation\nuse the app properly"
       },
 
     },

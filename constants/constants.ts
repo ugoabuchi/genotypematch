@@ -25,10 +25,13 @@ export const COPYRIGHTS = {
 }
 
 //export const MAIN_URL = "http://10.0.2.2/genotypematch-web/";
-export const MAIN_URL = "http://172.26.112.1/genotypematch-web/";
+export const MAIN_URL = "http://172.24.80.1/genotypematch-web/";
 //export const MAIN_URL = EXPO_UNDERLAY_SERVER_LINK+"/genotypematch-web/";
 export const ReQUEST_URL = MAIN_URL + "API_REQUEST";
 export const ReQUEST_IMAGE_URL = MAIN_URL + "webapp/File_Uploads/Gallery/Images";
+export const ReQUEST_VIDEO_URL = MAIN_URL + "webapp/File_Uploads/Gallery/Videos";
+export const ReQUEST_Gift_IMAGE_URL = MAIN_URL + "webapp/File_Uploads/Gifts/Images";
+export const ReQUEST_Gift_VIDEO_URL = MAIN_URL + "webapp/File_Uploads/Gifts/Videos";
 export const AXIOS_HEADER_CONFIG = {
   headers: {
     'Content-Type': "application/x-www-form-urlencoded"
@@ -76,6 +79,11 @@ export const API_RESPONSE = {
     INVALIDNOPEMATCHUSER: "nope-invalid-match-user",
     NOPEALREAYMATCHED: "nope-already-matched"
   },
+  LOAD_GIFT_ITEMS_AVAIL: {
+    SUCCESS: true,
+    NOGIFTITEMSAVAILABLE: "error-no-load-gift-item-available",
+    INVALIDLOADGIFTREQUEST: "error-invalid-gift-loading-request-params"
+  },
 }
 
 export const APP_RESPONSE = {
@@ -118,6 +126,11 @@ export const APP_RESPONSE = {
     NOPENOTLIKED: "nope-not-liked",
     INVALIDNOPEMATCHUSER: "nope-match-user-invalid",
     NOPEALREAYMATCHED: "nope-matched"
+  },
+  LOAD_GIFT_ITEMS_AVAIL: {
+    SUCCESS: "gift-loading-success",
+    NOGIFTITEMSAVAILABLE: "nope-load-gift-item-available",
+    INVALIDLOADGIFTREQUEST: "nope-invalid-gift-loading-request-params"
   },
 }
 

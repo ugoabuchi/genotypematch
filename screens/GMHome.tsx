@@ -23,11 +23,11 @@ import { Badge } from 'react-native-paper';
 import { getAge, getCountryByIndex, getCountryIndexByCountryCode, getCountryStateIndexByCountryCodeandState, getMyCountryCodeName, isLoggedIn, myCountryList, myCountryStatelist, SvgImager } from '../components/common';
 import { MyAlert } from '../components/PopUp';
 import { AccountListDropDown, AgeListDropDown, CountryListDropDown, CountryStateListDropDown, GenderListDropDown, GenotypeListDropDown } from '../components/ListDropDown';
-import { getMatchResults, sendYUP, sendNope } from '../components/axios';
+import { getMatchResults, sendYUP, sendNope, getAvailableGiftFromServer } from '../components/axios';
 import { AlertBoxStateParamType, MatchFilterType, NavPropsType, MatchesCardType, CardType, buttonParamType, LoadedGifts } from '../types';
 import { BloodBagIcon, FemaleGenderIcon, FilterIcon, GiftIcon, MaleGenderIcon, MenuIcon, NopeIcon, PREMIUMDisplayIcon, VerifiedUser100Icon, VIPDisplayIcon, YupIcon, BASICDisplayIcon, VerifiedUser50Icon, VerifiedUser10Icon, LoadIndicator, PrimaryLoadingIndicator, LocationIcon } from '../components/Icon';
 import { PulseViewAnimation } from '../components/Animations';
-import { ACCOUNT_TYPES, GM_NOTIFICATION, MATCH_REQUEST_LIMIT, REDUX_SESSION_LOCAL_STORE_KEYS, ReQUEST_IMAGE_URL } from '../constants/constants';
+import { ACCOUNT_TYPES, GM_NOTIFICATION, MATCH_REQUEST_LIMIT, REDUX_SESSION_LOCAL_STORE_KEYS, ReQUEST_Gift_IMAGE_URL, ReQUEST_IMAGE_URL } from '../constants/constants';
 import { requestGeoLocationPermission, getGeoLocationPermission, getGeoCoords, getGeoCoordsLocationDetails } from '../components/locationManager';
 import SwipeCards from 'react-native-swipe-cards-deck';
 import { SubButton } from '../components/Button';
@@ -118,6 +118,8 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
   const [giftFilterConfirmText, setGiftFilterConfirmText] = useState<string>(null);
 
   const [giftID, setGiftID] = useState<string>(null);
+
+  const [giftUserID, setGiftUserID] = useState<string>(null);
 
   const [giftItems, setGiftitems] = useState<LoadedGifts[]>(null);
   
@@ -358,6 +360,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     //set GiftID
 
     setGiftID("");
+    setGiftUserID("");
     setGiftloading(false);
 
     
@@ -426,7 +429,7 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
     }
     else
     {
-      if(countryIndex != countryDefaultIndex || stateIndex != countryStateDefaultIndex || genderIndex != genderDefaultIndex || genotypeIndex != genderDefaultIndex || accoountIndex != accountDefaultIndex || agerangeIndex != agerangeDefaultIndex)
+      if(countryIndex != countryDefaultIndex || stateIndex != countryStateDefaultIndex || genderIndex != genderDefaultIndex || genotypeIndex != genotypeDefaultIndex || accoountIndex != accountDefaultIndex || agerangeIndex != agerangeDefaultIndex)
       {
         return {
           value: false,
@@ -486,18 +489,26 @@ const GMHome = ({ navigation, route, login_session, profile_session, general_ses
    else
    {
 
-    await getGeoLocationPermission_sub();
+    /*await getGeoLocationPermission_sub();*/
 
    if(isLocation.enabled == true)
    {
       //get Location coords
-      const coords = await getGeoCoords();
+      //const coords = await getGeoCoords();
+      const coords : {latitude : number, longitude: number} = {latitude: 6.5243793, longitude: 3.3792057};
       if(coords)
       {
       //set and send request to server
       //send to API Server
 
-      const reverseCoords = await getGeoCoordsLocationDetails(coords);
+      //const reverseCoords = await getGeoCoordsLocationDetails(coords);
+      const reverseCoords :  {country: string, region: string, street: string, CountryCode: string} = {
+        country: "Nigeria",
+        region: "Lagos",
+        street: "Oyewole",
+        CountryCode: "NG"
+      }
+    
       if(reverseCoords == undefined || reverseCoords == null)
       {
         
@@ -877,8 +888,8 @@ const handleOpenSettings = () => {
     {
       setShowMyGiftFilter(false);
 
-      
-    console.log("lets Send the gift")
+      const currentGiftIDToUse = giftID;
+      const cuttentGiftUserIDToUse = giftUserID;
     //lets send the gift here
 
 
@@ -900,90 +911,62 @@ const handleOpenSettings = () => {
   
 
   const giftModalClose = () =>{
+
+    setGiftID("");
+    setGiftUserID("");
+
+    if(giftsLoading == true)
+      setGiftloading(false);
+    
     setShowMyGiftFilter(false);
-    setGiftloading(false);
+    
   }
 
-  const LoadAvailableGifts = () =>{
+  const LoadAvailableGifts = async (coords: {latitude: number, longitude: number}, matchuserdbID: string) =>{
+    
     if(giftsLoading == false)
       setGiftloading(true);
 
-    
-  if(giftItems != null && giftItems.length > 0)
-  {
-    const asyncSetGiftitems = async () => {
-
-      //call Axios to load from server, compare result if new then update giftitems
-      let result : LoadedGifts[] = null;
-
-      //sample gift result for testing, delete and load from API using axios
-      result = [
-        {key: 0, identifier:'HJklsoo13JDK98eRTyEHHDJCKsfsKSIkkd1', ext: 'gif'},
-        {key: 1, identifier:'XcBNDoi34JkOiusoIOEuMjkaiOlakLoIUn1', ext: 'gif'},
-        {key: 2, identifier:'POu3JKKoIEknJjjskKKAkKEEKKKahHgDH2', ext: 'gif'},
-      ];
-
-      if(result != null && result.length > 0){
-
-        if( result.length > giftItems.length)
+    if(showMyGoftFilter == false)
+      setShowMyGiftFilter(true);
+      const params = new URLSearchParams();
+        params.append('userid', profile_session.profile_session.username);
+        params.append('token',profile_session.profile_session.token);
+        params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
+        const APP_REQUEST_API = await getAvailableGiftFromServer(params, Lang);
+        if(APP_REQUEST_API.response == APP_RESPONSE.LOAD_GIFT_ITEMS_AVAIL.SUCCESS)
         {
-          setGiftitems(result);
+          setGiftitems(APP_REQUEST_API.data);
+          setGiftUserID(matchuserdbID);
+          setGiftloading(false);
         }
         else
         {
-          let isUpdateAvailable : boolean = false;
-
-          for(let i = 0; i < result.length; i++){
-
-            let updateCount : number = 0;
-            for(let j = 0; j < giftItems.length; j++){
-
-              if(giftItems[j].identifier != result[i].identifier && giftItems[j].ext != result[i].ext)
-              {
-                  updateCount = 1;
-              }
-              else
-              {
-                  updateCount = 0;
-              }
-
-            }
-
-            //update updateCounter if available
-            if(updateCount == 1)
-              {
-                isUpdateAvailable = true;
-                break;
-              }
-              
-          }
-
-
-          //check if new update exist
-          if(isUpdateAvailable)
-            setGiftitems(result);
-
+          const error = APP_REQUEST_API.response;
+          setGiftitems([]);
+          setGiftUserID("");
+          setGiftloading(false);
         }
+      //sample gift result for testing, delete and load from API using axios
+      /*setGiftitems(
+        [
+          {key: 0, identifier:'HJklsoo13JDK98eRTyEHHDJCKsfsKSIkkd1', ext: 'gif'},
+          {key: 1, identifier:'XcBNDoi34JkOiusoIOEuMjkaiOlakLoIUn1', ext: 'gif'},
+          {key: 2, identifier:'POu3JKKoIEknJjjskKKAkKEEKKKahHgDH2', ext: 'gif'},
+          {key: 3, identifier:'XcBNDoi34JkOiusoIOEuMjkaiOlakLoIUn1', ext: 'gif'},
+          {key: 4, identifier:'POu3JKKoIEknJjjskKKAkKEEKKKahHgDH2', ext: 'gif'},
+          {key: 5, identifier:'HJklsoo13JDK98eRTyEHHDJCKsfsKSIkkd1', ext: 'gif'},
+        ]
+      )*/
 
-      }
+  
 
-    }
-
-    asyncSetGiftitems();
-  }
-  else
-  {
-    //call Axios to load from server
-    //sample gift load
-    setGiftitems([
-      {key: 0, identifier:'HJklsoo13JDK98eRTyEHHDJCKsfsKSIkkd1', ext: 'gif'},
-      {key: 1, identifier:'XcBNDoi34JkOiusoIOEuMjkaiOlakLoIUn1', ext: 'gif'},
-      {key: 2, identifier:'POu3JKKoIEknJjjskKKAkKEEKKKahHgDH2', ext: 'gif'},
-    ]);
-  }
     
 
   }
+    
+
+  
 
   //hold previous temp filter values when in filter menu
   const storeTemporaryFilterValue = (previouaFilter: MatchFilterType) => {
@@ -1008,12 +991,8 @@ const handleOpenSettings = () => {
 
   const handleGift = (currentCard: MatchesCardType) => {
     
-    setGiftID("");
-    setGiftFilterTitle(Lang.GENERAL.DEFAULT_GIFT_MODAL_TITLE);
-    setShowModalGiftConfirm(true);
-    setGiftFilterConfirmText(Lang.GENERAL.DEFAULT_GIFT_SEND_TEXT);
-    setShowMyGiftFilter(true);
-    //return true;
+    GiftRequester(currentCard.id);
+    return false;
 
   }
 
@@ -1058,6 +1037,19 @@ const handleOpenSettings = () => {
         params.append('coords', coords.latitude +"BLARK"+ coords.longitude);
         await sendNope(params, Lang);
       }
+
+  }
+
+  const GiftRequester = async (matchuserdbID: string) : Promise<void> => {
+
+    //const coords = await getGeoCoords();
+    const coords : {latitude : number, longitude: number} = {latitude: 6.5243793, longitude: 3.3792057};
+    setGiftID("");
+    setGiftUserID("");
+    setGiftFilterTitle(Lang.GENERAL.DEFAULT_GIFT_MODAL_TITLE);
+    setShowModalGiftConfirm(true);
+    setGiftFilterConfirmText(Lang.GENERAL.DEFAULT_GIFT_SEND_TEXT);
+    LoadAvailableGifts(coords, matchuserdbID);
 
   }
 
@@ -1227,8 +1219,9 @@ const handleOpenSettings = () => {
   //Card Deck Component
   const HomeCardDeck = ({ card }: CardType) => {
     
-    
-    const [countryImageSrc, setCountryImageSrc] = useState(null);
+    const CardDeckItem = ({}) => {
+
+      const [countryImageSrc, setCountryImageSrc] = useState(null);
     const [imagesLoading, setImagesLoading] = useState<{
       profileImage: boolean,
       countryImage: Boolean
@@ -1516,6 +1509,20 @@ const handleOpenSettings = () => {
 
       </View>
     )
+
+    }
+
+    const cardDeckRef = useRef<any>(<CardDeckItem/>);
+
+    useEffect(()=>{
+
+      return ()=>{
+        cardDeckRef.current = null;
+      }
+    },[])
+
+    
+    return (cardDeckRef.current);
   }
 
   //Card Deck Component
@@ -1567,8 +1574,163 @@ const handleOpenSettings = () => {
     </View>
   )
 
+  const GiftItemsViewContent = ({item, currentGiftID} : {item: LoadedGifts, currentGiftID: any}) => {
 
-  const giftitemsView = (giftItemsArg : LoadedGifts[]) => {
+    const ItemViewCont = ({}) => {
+
+      const [giftIconLoading, setGiftIconLoading] = useState(true);
+      return (
+
+            <View style={{
+              width: '31.3%',
+              height: Dimensions.get('window').width / 3,
+              marginLeft: '1%',
+              marginRight: '1%',
+              paddingBottom: '0.5%',
+              backgroundColor: '#1F3A68'
+            }}>
+      
+              <TouchableOpacity
+              disabled={
+                item.accttype == ACCOUNT_TYPES.BASIC 
+                  ? 
+                  false 
+                  : 
+                  ( 
+                    item.accttype == ACCOUNT_TYPES.PREMIUM 
+                    ? 
+                    ( 
+                      profile_session.profile_session.accounttype == ACCOUNT_TYPES.PREMIUM 
+                        || profile_session.profile_session.accounttype == ACCOUNT_TYPES.VIP 
+                      ? 
+                      false 
+                      : 
+                      true
+                    ) 
+                    : 
+                    item.accttype == ACCOUNT_TYPES.VIP 
+                    ? 
+                    (
+                      profile_session.profile_session.accounttype == ACCOUNT_TYPES.VIP 
+                      ? 
+                      false 
+                      : 
+                      true
+                    ) 
+                  : 
+                  true
+                  
+                  )
+              }
+              style={{
+                width: '100%',
+                height: '80%',
+                backgroundColor:  (
+                  item.accttype == ACCOUNT_TYPES.BASIC 
+                  ? 
+                  (currentGiftID == "" ? '#FFFFFF' : (currentGiftID == item.identifier ? '#1F3A68' : "#FFFFFF")) 
+                  : 
+                  ( 
+                    item.accttype == ACCOUNT_TYPES.PREMIUM 
+                    ? 
+                    ( 
+                      profile_session.profile_session.accounttype == ACCOUNT_TYPES.PREMIUM 
+                        || profile_session.profile_session.accounttype == ACCOUNT_TYPES.VIP 
+                      ? 
+                      (currentGiftID == "" ? '#FFFFFF' : (currentGiftID == item.identifier ? '#1F3A68' : "#FFFFFF")) 
+                      : 
+                      '#EEEEEE'
+                    ) 
+                    : 
+                    item.accttype == ACCOUNT_TYPES.VIP 
+                    ? 
+                    (
+                      profile_session.profile_session.accounttype == ACCOUNT_TYPES.VIP 
+                      ? 
+                      (currentGiftID == "" ? '#FFFFFF' : (currentGiftID == item.identifier ? '#1F3A68' : "#FFFFFF")) 
+                      : 
+                      '#EEEEEE'
+                    ) 
+                  : 
+                  '#EEEEEE'
+                  )
+
+
+                ),
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              
+              onPress={()=>{
+                setGiftID(item.identifier);
+              }}
+              >
+                  <View style={{
+                    width: '100%',
+                    height: '80%',
+                    backgroundColor: '#1F3A68',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    display: giftIconLoading == true ? "flex" : "none" 
+                  }}>
+                      <LoadIndicator theme={Theme} />
+                  </View>
+                  <Image
+                    source={{ uri: ReQUEST_Gift_IMAGE_URL + "/" + item.identifier+"."+item.ext }}
+                    style={{
+                      width: currentGiftID == "" ? '60%' : (currentGiftID == item.identifier ? '90%' : "60%"),
+                      height: currentGiftID == "" ? '60%' : (currentGiftID == item.identifier ? '90%' : "60%"),
+                      display: giftIconLoading == false ? "flex" : "none" 
+                    }}
+                    resizeMode='cover'
+                    onLoadEnd={() => setGiftIconLoading(false)}
+                  />
+      
+              </TouchableOpacity>
+              <View style={{
+                width: '100%',
+                height: '20%',
+                paddingTop: '0.5%',
+              }}>
+                  <Text numberOfLines={1} style={{
+                    width: '100%',
+                    height: '100%',
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    fontFamily: Theme.GenralComponentColors.FONT1,
+                    backgroundColor: '#FFFFFF',
+                    color: currentGiftID == "" ? '#1F3A68' : (currentGiftID == item.identifier ? '#00B7EC' : "#1F3A68"),
+                    fontSize: 10
+                  }}>{item.amount}GC</Text>
+              </View>
+      
+            </View>
+
+      )
+    }
+    const giftItemRef = useRef<any>(<ItemViewCont/>);
+
+    useEffect(()=>{
+
+
+      return () => {
+        giftItemRef.current = null;
+      }
+    }, [])
+
+
+
+    
+
+
+
+  return (giftItemRef.current)
+
+  }
+
+  const giftitemsView = (giftItemsArg : LoadedGifts[], currentGiftID : any) => {
+
+    
 
     return (
 
@@ -1576,23 +1738,18 @@ const handleOpenSettings = () => {
       data = {giftItemsArg}
       keyExtractor = {item => item.identifier}
       numColumns = {3}
-      renderItem = {({item}) => (
-        <View style={{
-          width: Dimensions.get("window").width / 3,
-          height: Dimensions.get("window").width / 3,
-          backgroundColor: '#1F3A68'
-        }}>
+      columnWrapperStyle={{
+        marginTop: '1%',
+        marginBottom: '1%'
+      }}
+      renderItem = {({item, index}) => {
 
-          <View style={{
-            flex: 1,
-            margin: 3,
-            backgroundColor: '#000000'
-          }}>
 
-          </View>
+        return (
+          <GiftItemsViewContent item={item} currentGiftID={currentGiftID}/>
+        )
 
-        </View>
-      )}
+      }}
 
       />
 
@@ -1609,41 +1766,61 @@ const handleOpenSettings = () => {
     )
   }
 
-  const GiftContainerView = ({giftedItemArg, giftModalIsOpen} : {giftedItemArg : LoadedGifts[], giftModalIsOpen: boolean}) => {
+  const loadingGiftitemView = () => {
+    
+    return (
+      <View><Text>Gift is loading, please show loader here oh</Text></View>
+    )
+  }
 
-
-    useEffect(()=>{
-      if(giftModalIsOpen == true)
-      {
-        LoadAvailableGifts();
-      }
-
-    }, [giftModalIsOpen])
+  const GiftContainerView = ({giftedItemArg, giftLoadingArg, currentGiftID} : {giftedItemArg : LoadedGifts[], giftLoadingArg: boolean, currentGiftID: any}) => {
 
 
     return (
       <View>
         <View style={{
           width: "100%",
-          marginTop: 25,
-          backgroundColor: '#EEEEEE'
+          marginTop: 25
         }}>
         
         {
-          giftedItemArg != null && giftedItemArg.length > 0
+          giftLoadingArg == true
 
           ?
+          loadingGiftitemView()
 
-          giftitemsView(giftedItemArg)
+          :
+          
+          (
+
+            giftedItemArg != null && giftedItemArg.length > 0
+
+          ?
+          (
+            <View style={{
+                backgroundColor: '#EEEEEE',
+                width: '100%',
+                height: '100%',
+                padding: '1%'
+            }}>
+
+              {giftitemsView(giftedItemArg, currentGiftID)}
+              
+            </View>
+          )
+          
 
           :
 
           noGiftItemView()
 
+          )
+
 
         }
       </View>
-      </View>
+
+    </View>
     )
     
   }
@@ -1780,7 +1957,7 @@ const handleOpenSettings = () => {
         theme = {Theme}
         language = {Lang}
         title = {giftFilterTitle}
-        content = {<GiftContainerView giftedItemArg={giftItems} giftModalIsOpen={showMyGoftFilter}/>}
+        content = {<GiftContainerView giftedItemArg={giftItems} giftLoadingArg={giftsLoading} currentGiftID={giftID}/>}
         confirmText = {giftFilterConfirmText}
         confirmAction = {() => sendGift()}
         closeAction = {()=> giftModalClose()}

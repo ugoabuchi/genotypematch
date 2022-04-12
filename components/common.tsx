@@ -254,25 +254,16 @@ export const getAge = (DOB: Date) => {
 
 export const SvgImager = ({ url }: { url: string }) => {
 
-  try{
-      
-    const SVGImage = (
-      <SvgUri
-    width="20"
-    height="16"
-    viewBox="0 0 640 480"
-    uri={url}
-  />
-    );
+  const SVGImage = (
+    <SvgUri
+  width="20"
+  height="16"
+  viewBox="0 0 640 480"
+  uri={url}
+/>
+  );
 
-    return SVGImage;
-
-  }
-  catch(err){
-
-    return <></>
-    
-  }
+  return SVGImage;
 
 }
 

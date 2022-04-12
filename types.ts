@@ -399,6 +399,8 @@ export type CardType = {
 export type LoadedGifts = {
   key: number;
   identifier: string;
+  accttype: string;
+  amount: number;
   ext: string;
 }
 
